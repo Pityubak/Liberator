@@ -49,4 +49,4 @@ For now Liberator support only field and class injection.
 
 ## Example
 1. [GameAnnotationLibrary](https://github.com/Pityubak/GameAnnotationLibrary)
-
+2. [AutoInjector](https://github.com/Pityubak/AutoInjector)
