@@ -35,7 +35,7 @@ public class ObservingService {
 ~~~
 
 ### Third step:
-Creating of entrypoint, where injected classes with custom annotation.
+Creating of entrypoint, where inject classes with custom annotation.
 ~~~java
    public SwingBuilder(Class<?>[] classes) {
         liberator = new Liberator(SwingBuilder.class);
