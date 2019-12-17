@@ -1,7 +1,7 @@
 # Liberator
 Java injection tool that helps create custom annotation lib.
 
-# Overview
+## Overview
 
 ### First step:
 Custom annotation registration with @Register annotation:
@@ -44,9 +44,9 @@ Creating of entrypoint, where inject classes with custom annotation.
     }
 ~~~
 
-# Limitations
+## Limitations
 For now Liberator support only field and class injection.
 
-# Example
-1.[GameAnnotationLibrary](https://github.com/Pityubak/GameAnnotationLibrary)
+## Example
+1. [GameAnnotationLibrary](https://github.com/Pityubak/GameAnnotationLibrary)
 
