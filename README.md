@@ -45,7 +45,7 @@ Creating of entrypoint, where inject classes with custom annotation.
 ~~~
 
 ## Limitations
-For now Liberator support only field and class injection.
+For now Liberator support only field and class injection, and static/early initialization. 
 
 ## Example
 1. [GameAnnotationLibrary](https://github.com/Pityubak/GameAnnotationLibrary)
