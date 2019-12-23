@@ -1,7 +1,7 @@
 # Liberator
 Java injection tool that helps create custom annotation lib.
 
-# Overview
+## Overview
 
 ### First step:
 Custom annotation registration with @Register annotation:
@@ -35,7 +35,7 @@ public class ObservingService {
 ~~~
 
 ### Third step:
-Creating of entrypoint, where injected classes with custom annotation.
+Creating of entrypoint, where inject classes with custom annotation.
 ~~~java
    public SwingBuilder(Class<?>[] classes) {
         liberator = new Liberator(SwingBuilder.class);
@@ -44,7 +44,9 @@ Creating of entrypoint, where injected classes with custom annotation.
     }
 ~~~
 
-# Limitations
-For now Liberator support only field and class injection.
+## Limitations
+For now Liberator support only field and class injection, and static/early initialization. 
 
-
+## Example
+1. [GameAnnotationLibrary](https://github.com/Pityubak/GameAnnotationLibrary)
+2. [AutoInjector](https://github.com/Pityubak/AutoInjector)
