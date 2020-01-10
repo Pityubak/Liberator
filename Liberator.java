@@ -37,8 +37,10 @@ import com.pityubak.liberator.config.DependencyConfig;
 import com.pityubak.liberator.data.ObserverService;
 import com.pityubak.liberator.exceptions.ClassInstantiationException;
 import com.pityubak.liberator.lifecycle.InstanceService;
+import com.pityubak.liberator.service.MethodInjectService;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  *
@@ -55,6 +57,9 @@ public final class Liberator {
     private final ObserverService observerService;
     private final Data startupData;
 
+
+    private final MethodInjectService methodService;
+    
     public Liberator(final Class<?> cl) {
         this.instanceService = new SingletonInstanceService();
         this.startupData = new StartupData(cl.getResource(cl.getSimpleName() + ".class").getPath());
@@ -62,9 +67,10 @@ public final class Liberator {
         classCollection = new ClassInstanceCollection(this.startupData, cl);
         this.config = new MethodDependencyConfig();
         this.observerService = new ObjectObserverService();
-        this.container=new Container(this.config, this.instanceService, this.observerService, this.classCollection);
-    }
+        this.methodService = new MethodInjectService(this.instanceService, this.config);
+        this.container = new Container(this.config, this.instanceService, this.observerService, this.classCollection);
 
+    }
 
 
     public List<Class<?>> getClassListFromTargetPackage(final Class<?> mainClass) {
@@ -75,6 +81,7 @@ public final class Liberator {
         return clsCollector.collect();
     }
 
+    //temporary solution
     public Object inject(Class<?> injectedClass) {
         try {
             //Create new instance from injectedClass, use default, parameterless constructor
@@ -83,13 +90,16 @@ public final class Liberator {
         } catch (NoSuchMethodException | InstantiationException
                 | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException ex) {
-             throw new ClassInstantiationException("This class instance : " + injectedClass.getName() + " is null: "+ex);
+            throw new ClassInstantiationException("This class instance : " + injectedClass.getName() + " is null: " + ex);
         }
 
     }
-    
-    public void inject(Class<?>[] classes){
-        this.container.injectVoidMethod(classes);
+
+    public void inject(Class<?>[] classes) {
+        this.container.inject(classes);
     }
 
+    public void wrap(Class<?> injectedClass, Method method){
+        this.methodService.inject(injectedClass, method);
+    }
 }
