@@ -42,9 +42,9 @@ import com.pityubak.liberator.lifecycle.InstanceService;
  */
 public class MarkedClassInspectImpl implements MarkedClassInspect {
 
-    protected final InstanceService creator;
-    protected final ObserverService observer;
-    protected final DependencyConfig config;
+    private final InstanceService creator;
+    private final ObserverService observer;
+    private final DependencyConfig config;
 
     public MarkedClassInspectImpl(InstanceService creator, ObserverService observer, DependencyConfig config) {
         this.creator = creator;
@@ -55,7 +55,7 @@ public class MarkedClassInspectImpl implements MarkedClassInspect {
     @Override
     public void getMarkedClass(Class<?> cl, List<Class<?>> list) {
 
-        for (Class<?> anno : list) {
+        list.forEach((anno) -> {
             //Make new instance 
             Class<? extends Annotation> type = anno.asSubclass(Annotation.class);
             if (cl.isAnnotationPresent(type)) {
@@ -99,7 +99,7 @@ public class MarkedClassInspectImpl implements MarkedClassInspect {
                     throw new InjectionException("Injection failed : " + cl.getName() + " : " + ex);
                 }
             }
-        }
+        });
 
     }
 
