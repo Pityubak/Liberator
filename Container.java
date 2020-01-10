@@ -26,7 +26,7 @@ package com.pityubak.liberator;
 import com.pityubak.liberator.builder.AnnotationCollection;
 import com.pityubak.liberator.builder.InstanceCollection;
 import com.pityubak.liberator.misc.ModificationFlag;
-import com.pityubak.liberator.service.MethodInjection;
+import com.pityubak.liberator.service.InjectionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,7 +38,7 @@ import com.pityubak.liberator.data.ObserverService;
 import com.pityubak.liberator.lifecycle.InstanceService;
 
 /**
- * Container handles all operation instance creation method invocation 
+ * Container handles all operation instance creation method invocation
  *
  * @author Pityubak
  * @since 2019.09.20
@@ -51,7 +51,7 @@ public class Container {
     private final ObserverService observerService;
     private final DependencyConfig config;
     private final InstanceCollection instanceCollection;
-    private final MethodInjection methodInjection;
+    private final InjectionService injectionService;
 
     public Container(DependencyConfig config, InstanceService creator,
             ObserverService observer, InstanceCollection instanceCollection) {
@@ -62,16 +62,15 @@ public class Container {
         this.instanceCollection = instanceCollection;
         this.collection = new AnnotationCollection(this.config, this.instanceCollection);
         this.collection.collectAnnotation();
-        this.methodInjection = new MethodInjection(this.instanceService, this.observerService, this.config);
+        this.injectionService = new InjectionService(this.observerService, this.instanceService, this.config);
     }
-
 
     /**
      *
      * @param injectedClasses
      *
      */
-    public void injectVoidMethod(Class<?>[] injectedClasses) {
+    public void inject(Class<?>[] injectedClasses) {
 
         // Phase 1:Creation
         //
@@ -80,7 +79,7 @@ public class Container {
         Future<Void> creation = executor.submit(() -> {
             for (Class<?> injectedClass : injectedClasses) {
 
-                methodInjection.inject(injectedClass, ModificationFlag.PRIORITY_CREATION);
+                injectionService.inject(injectedClass, ModificationFlag.PRIORITY_CREATION);
             }
             return null;
         });
@@ -89,14 +88,14 @@ public class Container {
             creation.get();
         } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(Container.class.getName()).log(Level.SEVERE, null, ex);
-             Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
         }
         //Phase 2: High
 
         Future<Void> highPriority = executor.submit(() -> {
             for (Class<?> injectedClass : injectedClasses) {
 
-                this.methodInjection.inject(injectedClass, ModificationFlag.PRIORITY_HIGH);
+                this.injectionService.inject(injectedClass, ModificationFlag.PRIORITY_HIGH);
 
             }
             return null;
@@ -106,7 +105,7 @@ public class Container {
             highPriority.get();
         } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(Container.class.getName()).log(Level.SEVERE, null, ex);
-             Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
         }
 
         Future<Void> normalPriority = executor.submit(() -> {
@@ -114,7 +113,7 @@ public class Container {
 
             for (Class<?> injectedClass : injectedClasses) {
 
-                this.methodInjection.inject(injectedClass, ModificationFlag.PRIORITY_NORMAL);
+                this.injectionService.inject(injectedClass, ModificationFlag.PRIORITY_NORMAL);
 
             }
             return null;
@@ -124,14 +123,14 @@ public class Container {
             normalPriority.get();
         } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(Container.class.getName()).log(Level.SEVERE, null, ex);
-             Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
         }
 
         Future<Void> lowPriority = executor.submit(() -> {
             //Phase 4:Low
             for (Class<?> injectedClass : injectedClasses) {
 
-                this.methodInjection.inject(injectedClass, ModificationFlag.PRIORITY_LOW);
+                this.injectionService.inject(injectedClass, ModificationFlag.PRIORITY_LOW);
 
             }
             return null;
@@ -141,7 +140,7 @@ public class Container {
             lowPriority.get();
         } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(Container.class.getName()).log(Level.SEVERE, null, ex);
-             Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
         }
 
         executor.shutdown();
