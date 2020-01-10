@@ -28,28 +28,32 @@ import com.pityubak.liberator.misc.ModificationFlag;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import com.pityubak.liberator.config.DependencyConfig;
-import com.pityubak.liberator.config.MethodDetails;
 import com.pityubak.liberator.data.ObserverService;
 import com.pityubak.liberator.exceptions.ClassInstantiationException;
 import com.pityubak.liberator.lifecycle.InstanceService;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  *
  * @author Pityubak
  * @since 2019.09.20
  * @version 1.0
- * @see MethodInjectService
+ * @see FieldInjectService
  * @see Injection
  */
-public class MethodInjection extends MethodInjectService implements Injection {
+public class InjectionService implements Injection {
 
     private final MarkedClassInspect inspector;
+    private final FieldInjectService fieldService;
+    private final InstanceService instanceService;
+    private final DependencyConfig config;
+    private final ObserverService observer;
 
-    public MethodInjection(InstanceService creator, ObserverService observer, DependencyConfig config) {
-        super(creator, observer, config);
+    public InjectionService(ObserverService observer, InstanceService instanceService, DependencyConfig config) {
+        this.observer = observer;
+        this.instanceService = instanceService;
+        this.config = config;
         this.inspector = new MarkedClassInspectImpl(this.instanceService, this.observer, this.config);
+        this.fieldService = new FieldInjectService(this.instanceService, this.observer, this.config);
     }
 
     /**
@@ -68,14 +72,14 @@ public class MethodInjection extends MethodInjectService implements Injection {
                 Object obj = this.instanceService.createInstance(injectedClass);
 
                 if (injectedClass.getDeclaredAnnotations().length > 0) {
-                    this.inspector.getMarkedClass(injectedClass, this.getAnnotationList(this.config.get(flag)));
+                    this.inspector.getMarkedClass(injectedClass, this.config.getAnnotationList(flag));
                 }
                 //It iterate over declared fields of injected class
                 //and call parentclass method
                 for (Field f : injectedClass.getDeclaredFields()) {
 
                     if (f.getDeclaredAnnotations().length > 0) {
-                        this.injectMethod(f, obj, this.getAnnotationList(this.config.get(flag)));
+                        this.fieldService.injectMethod(f, obj, this.config.getAnnotationList(flag));
                     }
 
                 }
@@ -87,11 +91,6 @@ public class MethodInjection extends MethodInjectService implements Injection {
             }
         }
 
-
-    }
-
-    private List<Class<?>> getAnnotationList(List<MethodDetails> details) {
-        return details.stream().map(MethodDetails::getAnnotation).collect(Collectors.toList());
     }
 
 }
