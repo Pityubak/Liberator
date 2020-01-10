@@ -63,36 +63,39 @@ public final class AnnotationCollection {
         if (loadedClass.isAnnotationPresent(MethodBox.class)) {
             for (Method method : loadedClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(MethodElement.class)) {
-                    this.createMethodDetails(method, loadedClass);
+                    if (!method.isBridge() && !method.isSynthetic()) {
+                        this.createMethodDetails(method, loadedClass);
+                    }
                 }
             }
         }
     }
-    
-    private void createMethodDetails( final Method method, final Class<?> loadedClass){
-                   MethodElement element = method.getAnnotation(MethodElement.class);
-                    Class<?>[] paramType = method.getParameterTypes();
-                    if (paramType.length == 0) {
-                        throw new IllegalArgumentException("Parameter is missing from injected method  "
-                                + method
-                                + " Injected method always need  otarget annotation on first place.");
-                    } else {
-                        if (!paramType[0].isAnnotationPresent(Register.class)) {
-                            throw new ObjectNotRegisteredException("Parameter: "
-                                    + paramType[0] + "is not annotation or annotation isn't registered");
-                        } else {
 
-                            MethodDetails details = new MethodDetails.Builder()
-                                    .addMethodName(method.getName())
-                                    .addClassName(loadedClass)
-                                    .withParams(paramType)
-                                    .withAnnotation(paramType[0])
-                                    .withMethodFlag(element.value())
-                                    .withModificationFlag(element.flag())
-                                    .build();
-                            methodConfig.createMethodMapping(details);
+    private void createMethodDetails(final Method method, final Class<?> loadedClass) {
+        MethodElement element = method.getAnnotation(MethodElement.class);
+        Class<?>[] paramType = method.getParameterTypes();
+        if (paramType.length == 0) {
+            throw new IllegalArgumentException("Parameter is missing from injected method  "
+                    + method
+                    + " Injected method always need  target annotation on first place.");
+        } else {
 
-                        }
-                    }
+            if (!paramType[0].isAnnotationPresent(Register.class)) {
+                throw new ObjectNotRegisteredException("Parameter: "
+                        + paramType[0] + " is not annotation or annotation isn't registered");
+            } else {
+                MethodDetails details = new MethodDetails.Builder()
+                        .addMethodName(method.getName())
+                        .addClassName(loadedClass)
+                        .withParams(paramType)
+                        .withAnnotation(paramType[0])
+                        .withMethodFlag(element.value())
+                        .withModificationFlag(element.flag())
+                        .build();
+                methodConfig.createMethodMapping(details);
+
+            }
+        }
     }
+
 }
