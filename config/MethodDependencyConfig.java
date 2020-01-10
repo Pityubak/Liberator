@@ -27,6 +27,7 @@ import com.pityubak.liberator.misc.ModificationFlag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -72,9 +73,7 @@ public class MethodDependencyConfig implements DependencyConfig {
      * @param flag, type:ModificationFlag
      * @return MethodDetails list
      */
-    @Override
-
-    public List<MethodDetails> get(ModificationFlag flag) {
+    private List<MethodDetails> get(ModificationFlag flag) {
         List<MethodDetails> list = new ArrayList<>();
         this.methodDetailsList.forEach(el -> {
             if (el.getModFlag().equals(flag)) {
@@ -82,6 +81,12 @@ public class MethodDependencyConfig implements DependencyConfig {
             }
         });
         return list;
+    }
+
+    @Override
+    public List<Class<?>> getAnnotationList(ModificationFlag flag) {
+
+        return get(flag).stream().map(MethodDetails::getAnnotation).collect(Collectors.toList());
     }
 
 }
