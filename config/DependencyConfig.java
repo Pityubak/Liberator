@@ -37,7 +37,7 @@ public interface DependencyConfig {
 
     MethodDetails methodMapping(Class<?> cl);
 
-    List<MethodDetails> get(ModificationFlag flag);
+    List<Class<?>> getAnnotationList(ModificationFlag flag);
 
     void createMethodMapping(MethodDetails details);
 
