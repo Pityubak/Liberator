@@ -23,7 +23,6 @@
  */
 package com.pityubak.liberator.config;
 
-import com.pityubak.liberator.misc.MethodFlag;
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.util.List;
 
@@ -43,17 +42,17 @@ public final class MethodDetails {
 
     private final List<Class<?>> params;
 
-    private final MethodFlag methodFlag;
-
     private final ModificationFlag modFlag;
+
+    private final List<String> fieldNames;
 
     private MethodDetails(Builder builder) {
         this.methodName = builder.methodName;
         this.className = builder.className;
         this.annotation = builder.annotation;
         this.params = builder.params;
-        this.methodFlag = builder.methodFlag;
         this.modFlag = builder.modFlag;
+        this.fieldNames = builder.fieldNames;
     }
 
     public String getMethodName() {
@@ -72,12 +71,12 @@ public final class MethodDetails {
         return params;
     }
 
-    public MethodFlag getMethodFlag() {
-        return methodFlag;
-    }
-
     public ModificationFlag getModFlag() {
         return modFlag;
+    }
+
+    public List<String> getFieldNames() {
+        return fieldNames;
     }
 
     public static class Builder {
@@ -90,9 +89,14 @@ public final class MethodDetails {
 
         private List<Class<?>> params;
 
-        private MethodFlag methodFlag;
-
         private ModificationFlag modFlag;
+
+        private List<String> fieldNames;
+
+        public Builder withFieldNames(List<String> fieldNames) {
+            this.fieldNames = fieldNames;
+            return this;
+        }
 
         public Builder addMethodName(String methodName) {
             this.methodName = methodName;
@@ -111,11 +115,6 @@ public final class MethodDetails {
 
         public Builder withParams(Class<?>[] params) {
             this.params = List.of(params);
-            return this;
-        }
-
-        public Builder withMethodFlag(MethodFlag methodFlag) {
-            this.methodFlag = methodFlag;
             return this;
         }
 

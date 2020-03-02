@@ -25,17 +25,15 @@ package com.pityubak.liberator.builder;
 
 import com.pityubak.liberator.annotations.MethodBox;
 import com.pityubak.liberator.annotations.MethodElement;
-import com.pityubak.liberator.annotations.Register;
 import com.pityubak.liberator.config.MethodDetails;
-import com.pityubak.liberator.exceptions.ObjectNotRegisteredException;
 import java.lang.reflect.Method;
 import com.pityubak.liberator.config.DependencyConfig;
 
 /**
  *
  * @author Pityubak
- * @since 2019.12.12
- * @version 1.0 Make MethodDetails class and store it
+ * @since 2020.02.12
+ * @version 1.1 Make MethodDetails class and store it
  *
  */
 public final class AnnotationCollection {
@@ -55,11 +53,6 @@ public final class AnnotationCollection {
 
     private void registerMethodObject(final Class<?> loadedClass) {
 
-        /* If loadedClass is annotated with MethodBox it
-          iterate over parameter's declared methods and check it method's
-          annotationtype(MethodElement) present or not, and then collect data and
-          make new instance of MethodDetails
-         */
         if (loadedClass.isAnnotationPresent(MethodBox.class)) {
             for (Method method : loadedClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(MethodElement.class)) {
@@ -69,32 +62,28 @@ public final class AnnotationCollection {
                 }
             }
         }
+
     }
 
     private void createMethodDetails(final Method method, final Class<?> loadedClass) {
-        MethodElement element = method.getAnnotation(MethodElement.class);
-        Class<?>[] paramType = method.getParameterTypes();
+        final MethodElement element = method.getAnnotation(MethodElement.class);
+        final Class<?>[] paramType = method.getParameterTypes();
+
         if (paramType.length == 0) {
             throw new IllegalArgumentException("Parameter is missing from injected method  "
                     + method
                     + " Injected method always need  target annotation on first place.");
         } else {
 
-            if (!paramType[0].isAnnotationPresent(Register.class)) {
-                throw new ObjectNotRegisteredException("Parameter: "
-                        + paramType[0] + " is not annotation or annotation isn't registered");
-            } else {
-                MethodDetails details = new MethodDetails.Builder()
-                        .addMethodName(method.getName())
-                        .addClassName(loadedClass)
-                        .withParams(paramType)
-                        .withAnnotation(paramType[0])
-                        .withMethodFlag(element.value())
-                        .withModificationFlag(element.flag())
-                        .build();
-                methodConfig.createMethodMapping(details);
+            MethodDetails details = new MethodDetails.Builder()
+                    .addMethodName(method.getName())
+                    .addClassName(loadedClass)
+                    .withParams(paramType)
+                    .withAnnotation(paramType[0])
+                    .withModificationFlag(element.value())
+                    .build();
+            methodConfig.createMethodMapping(details);
 
-            }
         }
     }
 

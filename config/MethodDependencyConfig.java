@@ -36,30 +36,22 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @see DependencyConfig
  */
-public class MethodDependencyConfig implements DependencyConfig {
+public final class MethodDependencyConfig implements DependencyConfig {
 
     private final List<MethodDetails> methodDetailsList = new ArrayList<>();
 
-    /**
-     *
-     * @param details ,type:MethodDteails Add new intance of MethodDetails to
-     * collection
-     */
     @Override
-    public void createMethodMapping(MethodDetails details) {
+    public void createMethodMapping(final MethodDetails details) {
         methodDetailsList.add(details);
     }
 
-    /**
-     *
-     * @param cl,type:wildcard class
-     * @return MethodDetails from list by annotation
-     * @throws NoSuchElementException if collection not contains class
-     *
-     */
     @Override
-    public MethodDetails methodMapping(Class<?> cl) {
-        MethodDetails base = methodDetailsList.stream().filter(x -> x.getAnnotation().equals(cl)).findFirst().orElse(null);
+    public MethodDetails methodMapping(final Class<?> cl, final ModificationFlag flag) {
+
+        final MethodDetails base = this.get(flag).stream()
+                .filter(x -> x.getAnnotation().equals(cl))
+                .findFirst()
+                .orElse(null);
 
         if (base == null) {
             throw new NoSuchElementException("This class " + cl + " is not registered!");
@@ -73,20 +65,27 @@ public class MethodDependencyConfig implements DependencyConfig {
      * @param flag, type:ModificationFlag
      * @return MethodDetails list
      */
-    private List<MethodDetails> get(ModificationFlag flag) {
-        List<MethodDetails> list = new ArrayList<>();
+    private List<MethodDetails> get(final ModificationFlag flag) {
+
+        final List<MethodDetails> list = new ArrayList<>();
         this.methodDetailsList.forEach(el -> {
             if (el.getModFlag().equals(flag)) {
                 list.add(el);
+
             }
         });
         return list;
     }
 
     @Override
-    public List<Class<?>> getAnnotationList(ModificationFlag flag) {
+    public List<Class<?>> getAnnotationList(final ModificationFlag flag) {
 
         return get(flag).stream().map(MethodDetails::getAnnotation).collect(Collectors.toList());
+    }
+
+    @Override
+    public void removeMapping() {
+        this.methodDetailsList.clear();
     }
 
 }

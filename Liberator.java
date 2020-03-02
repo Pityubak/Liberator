@@ -23,10 +23,10 @@
  */
 package com.pityubak.liberator;
 
+import com.pityubak.liberator.builder.AnnotationCollection;
 import com.pityubak.liberator.builder.ClassInstanceCollection;
 
 import com.pityubak.liberator.builder.StartupData;
-import com.pityubak.liberator.data.ObjectObserverService;
 import com.pityubak.liberator.config.MethodDependencyConfig;
 
 import com.pityubak.liberator.lifecycle.SingletonInstanceService;
@@ -34,19 +34,23 @@ import java.util.List;
 import com.pityubak.liberator.builder.Data;
 import com.pityubak.liberator.builder.InstanceCollection;
 import com.pityubak.liberator.config.DependencyConfig;
-import com.pityubak.liberator.data.ObserverService;
-import com.pityubak.liberator.exceptions.ClassInstantiationException;
+import com.pityubak.liberator.config.ParameterInterceptionHandling;
+import com.pityubak.liberator.data.Interception;
+import com.pityubak.liberator.data.Request;
 import com.pityubak.liberator.lifecycle.InstanceService;
-import com.pityubak.liberator.service.MethodInjectService;
+import com.pityubak.liberator.misc.Insertion;
+import com.pityubak.liberator.service.AbstractMethodHandling;
+import com.pityubak.liberator.service.DetailsService;
+import com.pityubak.liberator.service.MethodDetailsService;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
+ * @since 2020.02.20
+ * @version 1.1
  */
 public final class Liberator {
 
@@ -54,52 +58,123 @@ public final class Liberator {
     private final Container container;
     private final InstanceCollection classCollection;
     private final DependencyConfig config;
-    private final ObserverService observerService;
     private final Data startupData;
 
+    private final DetailsService detailsService;
+    private final AbstractMethodHandling methodHandling;
 
-    private final MethodInjectService methodService;
-    
+    private final ParameterInterceptionHandling fieldHandling;
+
+    private final AnnotationCollection collection;
+
     public Liberator(final Class<?> cl) {
-        this.instanceService = new SingletonInstanceService();
+        this.fieldHandling = new ParameterInterceptionHandling();
+        this.instanceService = new SingletonInstanceService(this.fieldHandling);
         this.startupData = new StartupData(cl.getResource(cl.getSimpleName() + ".class").getPath());
 
-        classCollection = new ClassInstanceCollection(this.startupData, cl);
+        this.classCollection = new ClassInstanceCollection(this.startupData, cl);
         this.config = new MethodDependencyConfig();
-        this.observerService = new ObjectObserverService();
-        this.methodService = new MethodInjectService(this.instanceService, this.config);
-        this.container = new Container(this.config, this.instanceService, this.observerService, this.classCollection);
+        this.methodHandling = new AbstractMethodHandling(this.instanceService);
+        this.detailsService = new MethodDetailsService(this.config, this.instanceService);
+        this.collection = new AnnotationCollection(this.config, this.classCollection);
+        this.container = new Container(this.instanceService, this.config, this.detailsService, this.methodHandling);
 
     }
 
+    /**
+     * Require to proper running of Liberator.Always it's neccesary to call
+     * before inject.
+     */
+    public void init() {
 
+        this.collection.collectAnnotation();
+    }
+
+    /**
+     * Reset Liberator's setting.
+     */
+    public void reset() {
+        this.classCollection.removeAll();
+        this.config.removeMapping();
+        this.methodHandling.removeAll();
+    }
+
+    /**
+     * Interception registration
+     *
+     * @param interception
+     *
+     */
+    public void registerInterception(final Interception interception) {
+        this.fieldHandling.registrate(interception);
+    }
+
+    /**
+     *
+     * @param cl ,which Liberator should ignore.
+     */
+    public void addFilter(final Class<?> cl) {
+        this.classCollection.registerFilterClass(cl);
+    }
+
+    /**
+     *
+     * @param parent- target class
+     * @param cl--single method interface/abtract class
+     * @param insertion -Insertion, it shows that when it inject
+     */
+    public void registerAbstractMethod(final Class<?> parent, final Class<?> cl, final Insertion insertion) {
+        this.methodHandling.registrate(parent, cl, insertion);
+    }
+
+    /**
+     *
+     * @param mainClass
+     * @return list of all classes in package of mainClass
+     */
     public List<Class<?>> getClassListFromTargetPackage(final Class<?> mainClass) {
 
-        Data data = new StartupData(mainClass.getResource(mainClass.getSimpleName() + ".class").getPath());
-        ClassInstanceCollection clsCollector = new ClassInstanceCollection(data, mainClass);
+        final Data data = new StartupData(mainClass.getResource(mainClass.getSimpleName() + ".class").getPath());
+        final ClassInstanceCollection clsCollector = new ClassInstanceCollection(data, mainClass);
 
         return clsCollector.collect();
     }
 
-    //temporary solution
-    public Object inject(Class<?> injectedClass) {
-        try {
-            //Create new instance from injectedClass, use default, parameterless constructor
-            return this.instanceService.createInstance(injectedClass);
+    /**
+     *
+     * @return new Request
+     */
+    public Request askForRequest() {
+        return new Request(this.instanceService);
+    }
 
-        } catch (NoSuchMethodException | InstantiationException
-                | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException ex) {
-            throw new ClassInstantiationException("This class instance : " + injectedClass.getName() + " is null: " + ex);
+    /**
+     *
+     * @param injectedList
+     */
+    public void inject(final List<Object> injectedList) {
+        this.container.inject(injectedList);
+    }
+
+    /**
+     *
+     * @param map
+     */
+    public void inject(final Map<String, Class<?>> map) {
+        this.container.inject(map);
+    }
+
+    /**
+     *
+     * @param classes
+     */
+    public void inject(final Class<?>[] classes) {
+        final Map<String, Class<?>> map = new HashMap<>();
+        for (Class<?> cl : classes) {
+            map.put(cl.getSimpleName(), cl);
+
         }
-
+        this.container.inject(map);
     }
 
-    public void inject(Class<?>[] classes) {
-        this.container.inject(classes);
-    }
-
-    public void wrap(Class<?> injectedClass, Method method){
-        this.methodService.inject(injectedClass, method);
-    }
 }

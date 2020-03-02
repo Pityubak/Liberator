@@ -21,24 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
-
-import java.util.List;
+package com.pityubak.liberator.data;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
+ * @since 2019.12.12
+ * @version 1.0 Wrapper class
+ * @param <T>
  */
-public interface InstanceCollection {
+public final class Data<T> {
 
-    List<Class<?>> collect();
+    private final Class<T> type;
+    private final T instance;
+    private final boolean condition;
 
-    void registerFilterClass(Class<?> cl);
+    public Data(final Class<T> type, T instance) {
+        this.type = type;
+        this.instance = instance;
+        this.condition = false;
+    }
 
-    void removeFilterClass(Class<?> cl);
+    public Data(Class<T> type, T instance, boolean condition) {
+        this.type = type;
+        this.instance = instance;
+        this.condition = condition;
+    }
 
-    void removeAll();
+    public Class<T> getType() {
+        return type;
+    }
+
+    public T getInstance() {
+        return instance;
+    }
+
+    public boolean isCondition() {
+        return condition;
+    }
+
 }

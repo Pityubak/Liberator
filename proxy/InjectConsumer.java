@@ -21,24 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.proxy;
 
+import com.pityubak.liberator.misc.ModificationFlag;
+import com.pityubak.liberator.service.InjectionService;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
  */
-public interface InstanceCollection {
+public final class InjectConsumer implements Consumer<ModificationFlag> {
 
-    List<Class<?>> collect();
+    private final List<Object> injectedObjectList;
+    private final InjectionService service;
 
-    void registerFilterClass(Class<?> cl);
+    public InjectConsumer(List<Object> injectedObjectList, InjectionService service) {
+        this.injectedObjectList = injectedObjectList;
+        this.service = service;
+    }
 
-    void removeFilterClass(Class<?> cl);
+    @Override
+    public void accept(final ModificationFlag t) {
+        this.injectedObjectList.forEach(m -> this.service.inject(m, t));
+    }
 
-    void removeAll();
 }

@@ -26,71 +26,81 @@ package com.pityubak.liberator.service;
 import com.pityubak.liberator.exceptions.InjectionException;
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import com.pityubak.liberator.config.DependencyConfig;
-import com.pityubak.liberator.data.ObserverService;
-import com.pityubak.liberator.exceptions.ClassInstantiationException;
 import com.pityubak.liberator.lifecycle.InstanceService;
+import com.pityubak.liberator.misc.Insertion;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
+ * @since 2019.02.24
+ * @version 1.1
  * @see FieldInjectService
  * @see Injection
  */
 public class InjectionService implements Injection {
 
-    private final MarkedClassInspect inspector;
+    private final ClassInjectionService inspector;
     private final FieldInjectService fieldService;
     private final InstanceService instanceService;
     private final DependencyConfig config;
-    private final ObserverService observer;
+    private final AbstractMethodHandling methodHandling;
+    private final DetailsService service;
+    private final MethodInjectService methodService;
 
-    public InjectionService(ObserverService observer, InstanceService instanceService, DependencyConfig config) {
-        this.observer = observer;
+    public InjectionService(InstanceService instanceService,
+            DependencyConfig config, DetailsService service,
+            AbstractMethodHandling methodHandling) {
         this.instanceService = instanceService;
+        this.service = service;
         this.config = config;
-        this.inspector = new MarkedClassInspectImpl(this.instanceService, this.observer, this.config);
-        this.fieldService = new FieldInjectService(this.instanceService, this.observer, this.config);
+        this.methodHandling = methodHandling;
+        this.methodService = new MethodInjectService(this.service);
+        this.inspector = new ClassInjectionService(this.instanceService, this.service);
+        this.fieldService = new FieldInjectService(this.instanceService, this.service);
+
     }
 
-    /**
-     *
-     * @param injectedClass, Type:wildcard class
-     * @param flag
-     * @throws InjectionException when injection failed
-     * @throws ClassInstantiationException when return null value
-     */
     @Override
-    public void inject(Class<?> injectedClass, ModificationFlag flag) {
+    public void inject(final Object target, final ModificationFlag flag) {
 
-        //New instance creating 
-        if (!injectedClass.isInterface()) {
-            try {
-                Object obj = this.instanceService.createInstance(injectedClass);
+        final List<Class<?>> annotationList = this.config.getAnnotationList(flag);
+        final Class<?> injectedClass = target.getClass();
+        try {
 
-                if (injectedClass.getDeclaredAnnotations().length > 0) {
-                    this.inspector.getMarkedClass(injectedClass, this.config.getAnnotationList(flag));
-                }
-                //It iterate over declared fields of injected class
-                //and call parentclass method
-                for (Field f : injectedClass.getDeclaredFields()) {
-
-                    if (f.getDeclaredAnnotations().length > 0) {
-                        this.fieldService.injectMethod(f, obj, this.config.getAnnotationList(flag));
-                    }
-
-                }
-
-            } catch (NoSuchMethodException | InstantiationException
-                    | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException ex) {
-                throw new InjectionException("Injection failed : " + injectedClass.getName() + " : " + ex);
+            if (injectedClass.getDeclaredAnnotations().length > 0) {
+                this.inspector.inject(injectedClass, target, annotationList, flag);
             }
+
+            for (Field f : injectedClass.getDeclaredFields()) {
+
+                if (f.getDeclaredAnnotations().length > 0) {
+                    this.fieldService.inject(f, target, annotationList, flag);
+                }
+
+            }
+
+            for (Method m : injectedClass.getDeclaredMethods()) {
+
+                if (m.getDeclaredAnnotations().length > 0) {
+                    this.methodService.inject(m, target, annotationList, flag);
+                }
+            }
+
+            this.injectAbstractMethod(flag);
+        } catch (IllegalArgumentException ex) {
+            throw new InjectionException("Injection failed : " + target.getClass().getName() + " : " + ex);
         }
 
+    }
+
+    private void injectAbstractMethod(ModificationFlag flag) {
+        Insertion insertion = flag.getOneByOneInsertion();
+        Consumer<Insertion> c = this.methodHandling::execute;
+        c.accept(insertion);
     }
 
 }

@@ -23,45 +23,58 @@
  */
 package com.pityubak.liberator.data;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  *
  * @author Pityubak
- * @since 2019.11.23
- * @version 1.0
- * @param <T>
  */
-public final class RuntimeObject<T> {
+public final class ParameterInterception implements Interception {
 
-    private T observerableObject;
-    private String name;
-    private ObserverService observer;
+    private final List<Data> args = new ArrayList<>();
 
-    public RuntimeObject(final T observerableObject) {
-        this.observerableObject = observerableObject;
+    private final Class<?> cl;
+
+    public ParameterInterception(Class<?> cl) {
+        this.cl = cl;
     }
 
-    public T get() {
-        return observerableObject;
+    @Override
+    public <T> void registrate(final T value, final boolean condition) {
+        this.args.add(new Data(value.getClass(), value, condition));
     }
 
-    /**
-     * 
-     * @param observerableObject - new value of observerableObject field
-     * Value registration in ObserverService
-     */
-    public void set(final T observerableObject) {
-        if (this.observerableObject != observerableObject) {
-            this.observerableObject = observerableObject;
-            this.observer.registration(name, RuntimeObject.class, this);
+    @Override
+    public <T> void registrate(final T value) {
+        this.args.add(new Data(value.getClass(), value));
+    }
+
+    @Override
+    public Object[] receive() {
+        final Object[] params = new Object[this.args.size()];
+        for (int i = 0; i < params.length; i++) {
+            Data data = args.get(i);
+            params[i] = data.getInstance();
         }
+        return params;
     }
 
-    public void setObserver(ObserverService observer) {
-        this.observer = observer;
+    @Override
+    public Class<?> getTarget() {
+        return this.cl;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public void clearRemoveableData() {
+        Iterator it = this.args.iterator();
+        while (it.hasNext()) {
+            Data data = (Data) it.next();
+            if (data.isCondition()) {
+                it.remove();
+            }
+        }
     }
 
 }

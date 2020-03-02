@@ -21,24 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.proxy;
 
-import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
+ * @param <T>
  */
-public interface InstanceCollection {
+public interface BuilderStream<T> {
 
-    List<Class<?>> collect();
+    <U> BuilderStream<T> with(BiConsumer<T, U> consumer, U value);
 
-    void registerFilterClass(Class<?> cl);
-
-    void removeFilterClass(Class<?> cl);
-
-    void removeAll();
+    T build();
 }

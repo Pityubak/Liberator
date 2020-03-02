@@ -23,46 +23,41 @@
  */
 package com.pityubak.liberator;
 
-import com.pityubak.liberator.builder.AnnotationCollection;
-import com.pityubak.liberator.builder.InstanceCollection;
-import com.pityubak.liberator.misc.ModificationFlag;
+import com.pityubak.liberator.proxy.InjectConsumer;
 import com.pityubak.liberator.service.InjectionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import com.pityubak.liberator.config.DependencyConfig;
-import com.pityubak.liberator.data.ObserverService;
 import com.pityubak.liberator.lifecycle.InstanceService;
+import com.pityubak.liberator.proxy.InjectionProxy;
+import com.pityubak.liberator.proxy.InjectionStream;
+import com.pityubak.liberator.service.AbstractMethodHandling;
+import com.pityubak.liberator.service.DetailsService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
- * Container handles all operation instance creation method invocation
+ * Container handles all operation
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
+ * @since 2020.02.24
+ * @version 1.1
  */
 public class Container {
 
-    private final AnnotationCollection collection;
     private final InstanceService instanceService;
-    private final ObserverService observerService;
     private final DependencyConfig config;
-    private final InstanceCollection instanceCollection;
     private final InjectionService injectionService;
+    private final AbstractMethodHandling methodHandling;
+    private final DetailsService detailsService;
 
-    public Container(DependencyConfig config, InstanceService creator,
-            ObserverService observer, InstanceCollection instanceCollection) {
-
-        this.instanceService = creator;
-        this.observerService = observer;
+    public Container(InstanceService instanceService, DependencyConfig config,
+            DetailsService detailsService, AbstractMethodHandling methodHandling) {
+        this.instanceService = instanceService;
         this.config = config;
-        this.instanceCollection = instanceCollection;
-        this.collection = new AnnotationCollection(this.config, this.instanceCollection);
-        this.collection.collectAnnotation();
-        this.injectionService = new InjectionService(this.observerService, this.instanceService, this.config);
+        this.detailsService = detailsService;
+        this.methodHandling = methodHandling;
+        this.injectionService = new InjectionService(this.instanceService, this.config, this.detailsService, this.methodHandling);
     }
 
     /**
@@ -70,80 +65,22 @@ public class Container {
      * @param injectedClasses
      *
      */
-    public void inject(Class<?>[] injectedClasses) {
+    public void inject(final Map<String, Class<?>> injectedClasses) {
 
-        // Phase 1:Creation
+        final List<Object> namedObjectList = new ArrayList<>();
+        injectedClasses.keySet().forEach(name -> {
+            namedObjectList.add(this.instanceService.createInstance(name, injectedClasses.get(name)));
+        });
         //
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        //Creation is very important
-        Future<Void> creation = executor.submit(() -> {
-            for (Class<?> injectedClass : injectedClasses) {
+        this.inject(namedObjectList);
+    }
 
-                injectionService.inject(injectedClass, ModificationFlag.PRIORITY_CREATION);
-            }
-            return null;
-        });
-        //wait until creation phase done
-        try {
-            creation.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(Container.class.getName()).log(Level.SEVERE, null, ex);
-            Thread.currentThread().interrupt();
-        }
-        //Phase 2: High
+    public void inject(final List<Object> injectedClass) {
 
-        Future<Void> highPriority = executor.submit(() -> {
-            for (Class<?> injectedClass : injectedClasses) {
+        final Consumer consumer = new InjectConsumer(injectedClass, this.injectionService);
+        final InjectionStream injectionStream = new InjectionProxy(consumer, this.methodHandling);
+        injectionStream.execute();
 
-                this.injectionService.inject(injectedClass, ModificationFlag.PRIORITY_HIGH);
-
-            }
-            return null;
-        });
-        //wait until creation phase done
-        try {
-            highPriority.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(Container.class.getName()).log(Level.SEVERE, null, ex);
-            Thread.currentThread().interrupt();
-        }
-
-        Future<Void> normalPriority = executor.submit(() -> {
-            //Phase 3:Normal
-
-            for (Class<?> injectedClass : injectedClasses) {
-
-                this.injectionService.inject(injectedClass, ModificationFlag.PRIORITY_NORMAL);
-
-            }
-            return null;
-        });
-        //wait until creation phase done
-        try {
-            normalPriority.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(Container.class.getName()).log(Level.SEVERE, null, ex);
-            Thread.currentThread().interrupt();
-        }
-
-        Future<Void> lowPriority = executor.submit(() -> {
-            //Phase 4:Low
-            for (Class<?> injectedClass : injectedClasses) {
-
-                this.injectionService.inject(injectedClass, ModificationFlag.PRIORITY_LOW);
-
-            }
-            return null;
-        });
-        //wait until creation phase done
-        try {
-            lowPriority.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(Container.class.getName()).log(Level.SEVERE, null, ex);
-            Thread.currentThread().interrupt();
-        }
-
-        executor.shutdown();
     }
 
 }

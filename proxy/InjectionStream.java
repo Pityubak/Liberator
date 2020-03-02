@@ -21,24 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
-
-import java.util.List;
+package com.pityubak.liberator.proxy;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
+ * @param <T>
  */
-public interface InstanceCollection {
+public interface InjectionStream<T> {
 
-    List<Class<?>> collect();
-
-    void registerFilterClass(Class<?> cl);
-
-    void removeFilterClass(Class<?> cl);
-
-    void removeAll();
+    void execute();
 }

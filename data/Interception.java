@@ -21,24 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
-
-import java.util.List;
+package com.pityubak.liberator.data;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
  */
-public interface InstanceCollection {
+public interface Interception {
 
-    List<Class<?>> collect();
+    <T> void registrate(T value);
 
-    void registerFilterClass(Class<?> cl);
+    <T> void registrate(T value, boolean condition);
 
-    void removeFilterClass(Class<?> cl);
+    Object[] receive();
 
-    void removeAll();
+    void clearRemoveableData();
+
+    Class<?> getTarget();
 }

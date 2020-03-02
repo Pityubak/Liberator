@@ -21,24 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.service;
 
-import java.util.List;
+import com.pityubak.liberator.misc.ModificationFlag;
+import java.lang.reflect.Method;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
  */
-public interface InstanceCollection {
+public interface DetailsService {
 
-    List<Class<?>> collect();
+    void processDetails(Class<?> cl, ModificationFlag flag);
 
-    void registerFilterClass(Class<?> cl);
+    Object processInstance();
 
-    void removeFilterClass(Class<?> cl);
+    Method processMethod() throws NoSuchMethodException;
 
-    void removeAll();
 }

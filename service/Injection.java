@@ -33,6 +33,6 @@ import com.pityubak.liberator.misc.ModificationFlag;
  */
 public interface Injection {
 
-    void inject(Class<?> injectedClass,ModificationFlag flag);
-       
+    void inject(Object target, ModificationFlag flag);
+
 }

@@ -37,45 +37,66 @@ import java.util.List;
  * @since 2019.9.20
  * @see InstanceCollection
  * @version 1.0 It collect all annotations, what are annotated with Register and
- * all classes and methods, where MethodBox/MethodElement annotations
- * are present.
+ * all classes and methods, where MethodBox/MethodElement annotations are
+ * present.
  */
 public final class ClassInstanceCollection implements InstanceCollection {
 
     private final Data classData;
     private final Class<?> entryClass;
 
-    public ClassInstanceCollection(final Data finder,final Class<?> entryClass) {
+    private final List<Class<?>> filter = new ArrayList<>();
+
+    public ClassInstanceCollection(final Data finder, final Class<?> entryClass) {
         this.classData = finder;
         this.entryClass = entryClass;
 
     }
 
+    @Override
+    public void registerFilterClass(Class<?> cl) {
 
+        if (!this.filter.contains(cl)) {
+            this.filter.add(cl);
+        }
+
+    }
+
+    @Override
+    public void removeFilterClass(final Class<?> cl) {
+        if (this.filter.contains(cl)) {
+            this.filter.remove(cl);
+        }
+    }
+
+    @Override
+    public void removeAll() {
+        this.filter.clear();
+    }
 
     /**
      * @return List<Class<?>>
-     * 
+     *
      */
     @Override
     public List<Class<?>> collect() {
 
-        /*With instance of Data iterate over all files in
-          target project and call registerDependencyObject
-          method.
-         */
-        List<Class<?>> classList = new ArrayList<>();
-        String packageName = this.entryClass.getPackage().getName();
+        final List<Class<?>> classList = new ArrayList<>();
+        final String packageName = this.entryClass.getPackage().getName();
         classData.getPathList().stream().map(Path::toString)
                 .filter(fileName -> fileName.endsWith(".class"))
                 .map(fileName -> fileName.replaceAll(".class", ""))
                 .forEachOrdered((String file) -> {
-                    String[] currentFile = file.split(packageName);
+                    final String[] currentFile = file.split(packageName);
                     String neededPart = currentFile[currentFile.length - 1];
                     neededPart = neededPart.replace("\\", ".");
                     try {
-                        Class<?> loadedClass = Class.forName(packageName + neededPart);
-                        classList.add(loadedClass);
+                        final Class<?> loadedClass = Class.forName(packageName + neededPart);
+
+                        if (!this.filter.contains(loadedClass)) {
+                            classList.add(loadedClass);
+
+                        }
 
                     } catch (ClassNotFoundException ex) {
                         Logger.getLogger(ClassInstanceCollection.class.getName()).log(Level.SEVERE, null, ex);

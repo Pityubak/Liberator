@@ -23,42 +23,50 @@
  */
 package com.pityubak.liberator.service;
 
-import java.lang.reflect.Field;
-import java.util.List;
 import com.pityubak.liberator.config.DependencyConfig;
+import com.pityubak.liberator.config.MethodDetails;
 import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.misc.ModificationFlag;
-import com.pityubak.liberator.proxy.InjectionPipe;
-import com.pityubak.liberator.proxy.Pipe;
-import com.pityubak.liberator.proxy.ResponseProxy;
+import java.lang.reflect.Method;
 
 /**
  *
  * @author Pityubak
- * @since 2020.02.27
- * @version 1.0
  */
-public final class FieldInjectService implements ExecutorService<Field> {
+public final class MethodDetailsService implements DetailsService {
 
-    private final InstanceService instanceService;
-    private final DetailsService service;
+    private final DependencyConfig config;
 
-    public FieldInjectService(InstanceService creator, DetailsService service) {
-        this.instanceService = creator;
+    private final InstanceService service;
+
+    private MethodDetails detail;
+
+    public MethodDetailsService(DependencyConfig config, InstanceService service) {
+        this.config = config;
         this.service = service;
-
     }
 
     @Override
-    public void inject(final Field f, final Object obj, final List<Class<?>> list, final ModificationFlag flag) {
+    public Object processInstance() {
+        final Class<?> cls = detail.getClassName();
 
-        final ResponseProxy responseService = new FieldResponseService(this.instanceService, obj, f);
-        final FieldInjectFinalizerService injService = new FieldInjectFinalizerService(service, responseService, obj);
-        final Pipe<Field> pipe = new InjectionPipe<Field>(list, this.service, injService)
-                .filter((t, q) -> t.isAnnotationPresent(q));
+        return this.service.createInstance(cls.getSimpleName(), cls);
+    }
 
-        pipe.execute(f, flag);
+    @Override
+    public Method processMethod() throws NoSuchMethodException {
+        final Class<?> cl = detail.getClassName();
 
+        Class<?>[] params = new Class<?>[detail.getParams().size()];
+        params = detail.getParams().toArray(params);
+
+        return cl.getDeclaredMethod(detail.getMethodName(),
+                params);
+    }
+
+    @Override
+    public void processDetails(final Class<?> cl, final ModificationFlag flag) {
+        this.detail = this.config.methodMapping(cl, flag);
     }
 
 }

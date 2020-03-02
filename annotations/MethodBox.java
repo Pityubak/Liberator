@@ -29,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * For class, what contains injectable methods
+ *
  * @author Pityubak
  * @since 2019.09.20
  * @version 1.0
@@ -37,5 +37,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface MethodBox {
-   
+
 }

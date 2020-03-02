@@ -29,16 +29,18 @@ import java.util.List;
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
+ * @since 2020.01.12
+ * @version 1.1
  * @see MethodDependencyConfig
  */
 public interface DependencyConfig {
 
-    MethodDetails methodMapping(Class<?> cl);
+    MethodDetails methodMapping(Class<?> cl, ModificationFlag flag);
 
     List<Class<?>> getAnnotationList(ModificationFlag flag);
 
     void createMethodMapping(MethodDetails details);
+
+    void removeMapping();
 
 }

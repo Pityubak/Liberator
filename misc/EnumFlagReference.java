@@ -26,21 +26,10 @@ package com.pityubak.liberator.misc;
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
  */
-public enum MethodFlag {
-    WITH_VALUE,
-    WITH_NAME,
-    WITH_NAME_AND_VALUE,
-    WITH_OBSERVER,
-    WITH_OBSERVER_AND_VALUE,
-    WITH_OBSERVER_AND_NAME,
-    WITH_OBSERVER_AND_NAME_AND_VALUE,
-    WITH_REQUEST,
-    WITH_REQUEST_AND_OBSERVER,
-    WITH_REQUEST_OBSERVER_AND_VALUE,
-    WITH_REQUEST_OBSERVER_AND_NAME,
-    WITH_REQUEST_OBSERVER_AND_NAME_AND_VALUE,
-    WITH_NO_PARAMETER, //Default value of method injection, no parameter
+public interface EnumFlagReference {
+
+    Insertion getOneByOneInsertion();
+
+    Insertion getaggregateInsertion();
 }

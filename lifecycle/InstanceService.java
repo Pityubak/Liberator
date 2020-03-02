@@ -23,14 +23,12 @@
  */
 package com.pityubak.liberator.lifecycle;
 
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * Lifecycle handling interface
  *
  * @author Pityubak
  * @version 1.0
- * @since 2019.09.20
+ * @since 2020.01.12
  * @see SingletonInstanceService
  */
 public interface InstanceService {
@@ -38,16 +36,11 @@ public interface InstanceService {
     /**
      * Create instance from parameters with reflection
      *
+     * @param name
      * @param cl-this is class, what we want to create
      * @return Object-created object
-     * @throws java.lang.NoSuchMethodException
-     * @throws java.lang.InstantiationException
-     * @throws java.lang.IllegalAccessException
-     * @throws java.lang.reflect.InvocationTargetException
      *
      */
-    Object createInstance(Class<?> cl) throws NoSuchMethodException, InstantiationException,
-             IllegalAccessException,
-            InvocationTargetException;
+    Object createInstance(String name, Class<?> cl);
 
 }

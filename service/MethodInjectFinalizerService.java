@@ -21,32 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.data;
+package com.pityubak.liberator.service;
+
+import com.pityubak.liberator.proxy.Machine;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  *
  * @author Pityubak
- * @since 2019.12.12
- * @version 1.0
- * Wrapper class
- * @param <T>
  */
-public final class StoredData<T> {
+public final class MethodInjectFinalizerService implements InjectFinalizerService<Method> {
 
-    private final Class<T> type;
-    private final T instance;
+    private final DetailsService methService;
 
-    public StoredData(final Class<T> type, T instance) {
-        this.type = type;
-        this.instance = instance;
+    private final Object caller;
+
+    public MethodInjectFinalizerService(DetailsService methService, Object caller) {
+        this.methService = methService;
+        this.caller = caller;
     }
 
-    public Class<T> getType() {
-        return type;
-    }
-
-    public T getInstance() {
-        return instance;
+    @Override
+    public void finalizeMethodInvocation(final Method target, final Class<? extends Annotation> type) {
+        final Object instance = this.methService.processInstance();
+        final Machine machine = (Machine) instance;
+        machine.invoke(target.getAnnotation(type), this.caller, target);
     }
 
 }

@@ -21,21 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.annotations;
+package com.pityubak.liberator.proxy;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
- * For annotation registration
+ *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
+ * @param <T>
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.ANNOTATION_TYPE)
-public @interface Register {
-    
+public class BuilderProxy<T> implements BuilderStream<T> {
+
+    private final Supplier<T> initSupplier;
+
+    private final List<Consumer<T>> variablesModifiers = new ArrayList<>();
+
+    private BuilderProxy(Supplier<T> initSupplier) {
+        this.initSupplier = initSupplier;
+    }
+
+    public static <T> BuilderProxy<T> of(final Supplier<T> instantiator) {
+        return new BuilderProxy<>(instantiator);
+    }
+
+    @Override
+    public <U> BuilderProxy<T> with(final BiConsumer<T, U> consumer, final U value) {
+        final Consumer<T> c = instance -> consumer.accept(instance, value);
+        variablesModifiers.add(c);
+        return this;
+    }
+
+    @Override
+    public T build() {
+        final T value = initSupplier.get();
+        variablesModifiers.forEach(modifier -> modifier.accept(value));
+        variablesModifiers.clear();
+        return value;
+    }
 }

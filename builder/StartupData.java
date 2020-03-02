@@ -57,10 +57,6 @@ public final class StartupData implements Data {
         this.inJar = startInJar();
     }
 
-    /**
-     *
-     * @return String-modified rawPath
-     */
     public String normalizePathURI() {
 
         if (inJar) {
@@ -70,23 +66,14 @@ public final class StartupData implements Data {
         return inJar ? new File(rawPath).getPath() : new File(rawPath).getParent();
     }
 
-    /**
-     *
-     * @param rawPath-
-     * @return boolean value true, when it start in jar file, and false when not
-     */
     boolean startInJar() {
         return this.rawPath.contains(".jar!");
     }
 
-    /**
-     *
-     * @return List with Path collect path with helper methods
-     */
     @Override
     public List<Path> getPathList() {
-        String target = this.normalizePathURI();
-        List<Path> path = new ArrayList<>();
+        final String target = this.normalizePathURI();
+        final List<Path> path = new ArrayList<>();
         if (inJar) {
             getFilesFromJar(target, path);
         } else {
@@ -95,18 +82,13 @@ public final class StartupData implements Data {
         return path;
     }
 
-    /**
-     *
-     * @param targetPath-where start
-     * @param list-add paths to list from jar when it start in jar file
-     */
     private void getFilesFromJar(final String targetPath, final List<Path> list) {
         try {
             try (JarFile jarFile = new JarFile(targetPath)) {
                 final Enumeration<JarEntry> entries = jarFile.entries();
                 while (entries.hasMoreElements()) {
                     final JarEntry entry = entries.nextElement();
-                    String entryName = entry.getName();
+                    final String entryName = entry.getName();
                     list.add(Paths.get(targetPath + entryName));
                 }
             }
@@ -115,22 +97,16 @@ public final class StartupData implements Data {
         }
     }
 
-    /**
-     *
-     * @param classPath-where start
-     * @param paths list-add paths to list when it not start in jar file
-     */
     private void getFilesFromFileSystem(final String classPath, final List<Path> paths) {
-  
-            try (Stream<Path> list = Files.find(Paths.get(classPath),
-                    Integer.MAX_VALUE,
-                    (filePath, fileAttr) -> fileAttr.isRegularFile())) {
-                
-                list.forEach(paths::add);
-            } catch (IOException ex) {
+
+        try (Stream<Path> list = Files.find(Paths.get(classPath),
+                Integer.MAX_VALUE,
+                (filePath, fileAttr) -> fileAttr.isRegularFile())) {
+
+            list.forEach(paths::add);
+        } catch (IOException ex) {
             Logger.getLogger(StartupData.class.getName()).log(Level.SEVERE, null, ex);
         }
-
 
     }
 

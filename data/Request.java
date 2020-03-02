@@ -24,7 +24,6 @@
 package com.pityubak.liberator.data;
 
 import com.pityubak.liberator.exceptions.RequestInitializationException;
-import java.lang.reflect.InvocationTargetException;
 import com.pityubak.liberator.lifecycle.InstanceService;
 
 /**
@@ -48,21 +47,13 @@ public final class Request<T> {
         this.requestType = requestType;
     }
 
-    /**
-     * 
-     * @return T type
-     * @throws RequestInitializationException,
-     * when instantiation or casting failed
-     */
-    public T response() {
+    public T response(String name) {
         try {
-            this.requestObject = (T) creator.createInstance(requestType);
-        } catch (NoSuchMethodException | InstantiationException
-                | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException ex) {
+            this.requestObject = (T) creator.createInstance(name, requestType);
+        } catch (IllegalArgumentException ex) {
 
             throw new RequestInitializationException("Requested object"
-                    + this.requestObject + "creation failed: " + ex);
+                    + this.requestObject + "creation failed: " + ex.getMessage());
         }
         return this.requestObject;
     }

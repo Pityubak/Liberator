@@ -43,7 +43,7 @@ public final class NormalizedPath {
             rawPath = rawPath.substring(5);
 
         }
-        int position = rawPath.indexOf("!/");
+        final int position = rawPath.indexOf("!/");
 
         rawPath = position == -1 ? rawPath : rawPath.substring(0, position);
         return rawPath;

@@ -21,24 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.service;
 
+import com.pityubak.liberator.misc.ModificationFlag;
 import java.util.List;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
+ * @param <R>
  */
-public interface InstanceCollection {
+public interface ExecutorService<R> {
 
-    List<Class<?>> collect();
-
-    void registerFilterClass(Class<?> cl);
-
-    void removeFilterClass(Class<?> cl);
-
-    void removeAll();
+    void inject(R target, Object obj, List<Class<?>> list, ModificationFlag flag);
 }

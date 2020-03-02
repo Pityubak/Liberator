@@ -21,20 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.data;
+package com.pityubak.liberator.proxy;
+
+import com.pityubak.liberator.misc.ModificationFlag;
+import java.lang.annotation.Annotation;
+import java.util.function.BiPredicate;
 
 /**
  *
  * @author Pityubak
- * @since 2019.10.10
- * @version 1.0
- * @see ObjectObserver
+ * @param <R>
  */
-public interface ObserverService {
+public interface Pipe<R> {
 
-    <T> T getObjectByName(String name);
+    void execute(R let, ModificationFlag flag);
 
-    <T> void registration(String name, Class<T> type, T instance);
+    Pipe<R> filter(BiPredicate<R, Class<? extends Annotation>> predicate);
 
-    void registrationWithStoredData(String name, StoredData data);
 }

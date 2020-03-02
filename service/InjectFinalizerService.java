@@ -23,12 +23,14 @@
  */
 package com.pityubak.liberator.service;
 
-import com.pityubak.liberator.misc.MethodFlag;
+import java.lang.annotation.Annotation;
 
 /**
  *
  * @author Pityubak
+ * @param <C>
  */
-public interface Process {
-    Object[] process(MethodFlag flag);
+public interface InjectFinalizerService<C> {
+
+    void finalizeMethodInvocation(C target, Class<? extends Annotation> type);
 }

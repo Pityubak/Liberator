@@ -29,10 +29,64 @@ package com.pityubak.liberator.misc;
  * @since 2019.10.20
  * @version 1.1
  */
-public enum ModificationFlag {
-    PRIORITY_CREATION, // Default value in MethodElement' s flag value - First run
-    PRIORITY_HIGH, // Second run-need existing object from creation phase
-    PRIORITY_NORMAL, // Third run-need existing object from creation or high phase
-    PRIORITY_LOW  // Fourth run -it depends all above phase
- 
+public enum ModificationFlag implements EnumFlagReference {
+    PRIORITY_CREATION {
+        @Override
+        public Insertion getOneByOneInsertion() {
+            return Insertion.PER_CLASS_CREATION;
+        }
+
+        @Override
+        public Insertion getaggregateInsertion() {
+            return Insertion.BEFORE_CREATION;
+        }
+
+    },
+    PRIORITY_HIGH {
+        @Override
+        public Insertion getOneByOneInsertion() {
+            return Insertion.PER_CLASS_HIGH;
+        }
+
+        @Override
+        public Insertion getaggregateInsertion() {
+            return Insertion.BEFORE_HIGH;
+        }
+    },
+    PRIORITY_NORMAL {
+        @Override
+        public Insertion getOneByOneInsertion() {
+            return Insertion.PER_CLASS_NORMAL;
+        }
+
+        @Override
+        public Insertion getaggregateInsertion() {
+            return Insertion.BEFORE_NORMAL;
+        }
+    },
+    PRIORITY_LOW {
+        @Override
+        public Insertion getOneByOneInsertion() {
+            return Insertion.PER_CLASS_LOW;
+        }
+
+        @Override
+        public Insertion getaggregateInsertion() {
+            return Insertion.BEFORE_LOW;
+        }
+
+    },
+    NONE {
+        @Override
+        public Insertion getOneByOneInsertion() {
+            return Insertion.NONE;
+        }
+
+        @Override
+        public Insertion getaggregateInsertion() {
+            return Insertion.NONE;
+        }
+
+    }
+
 }

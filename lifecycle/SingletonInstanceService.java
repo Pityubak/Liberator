@@ -23,6 +23,8 @@
  */
 package com.pityubak.liberator.lifecycle;
 
+import com.pityubak.liberator.config.ParameterInterceptionHandling;
+import com.pityubak.liberator.data.ParameterInterception;
 import com.pityubak.liberator.exceptions.ClassInstantiationException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -30,65 +32,57 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Implements InstanceService interface First time create instance then return
- * back always existing instance
- *
  * @author Pityubak
- * @version 1.0
- * @since 2019.09.20
+ * @version 0.2
+ * @since 2020.01.12
  */
 public final class SingletonInstanceService implements InstanceService {
 
-    private final Map<Class<?>, Object> singletons = new HashMap<>();
+    private final Map<String, Object> singletons = new HashMap<>();
 
-   
-    private  Object target;
+    private final ParameterInterceptionHandling interception;
 
-    /**
-     *
-     * @param cl-target class,type:wildcard class
-     * @return new Object
-     * @throws IllegalArgumentException method or constructor parameters
-     * mismatching
-     */
+    private Object target;
+
+    public SingletonInstanceService(ParameterInterceptionHandling interception) {
+        this.interception = interception;
+    }
+
     @Override
-    public Object createInstance(final Class<?> cl) {
+    public Object createInstance(final String name, final Class<?> cl) {
 
-        target = singletons.get(cl);
-        Constructor constructor = null;
-        try {
-            constructor = cl.getConstructor();
-        } catch (NoSuchMethodException | SecurityException ex) {
-            throw new ClassInstantiationException("This class: "
-                    + cl.getName() + " creation failed: " + ex);
-        }
-        return target == null ? getInstance(constructor, cl, new Object[]{})
+        target = singletons.get(name);
+
+        return target == null ? getInstance(name, cl)
                 : target;
     }
 
-    /**
-     *
-     * @param cl-target class,type:wildcard class
-     * @param constructor-constructor of target class,type:Constructor
-     * @param params-constructor's parameter,type: Object array
-     * @return new Object
-     *
-     */
-    private Object getInstance(final Constructor constructor, final Class<?> cl, final Object[] params) {
+    private Object getInstance(final String name, final Class<?> cl) {
 
         //thread locking
         synchronized ((SingletonInstanceService.class)) {
             // double-checking , first check in createInstance method
             if (target == null) {
                 try {
-                    Class<?>[] paramTypes = constructor.getParameterTypes();
-                    target = cl.getConstructor(paramTypes).newInstance(params);
-                    singletons.put(cl, target);
+                    for (Constructor constructor : cl.getDeclaredConstructors()) {
+                        final Class<?>[] paramTypes = constructor.getParameterTypes();
+                        final ParameterInterception req = this.interception.getRequiredArgs(cl);
+                        if (req != null) {
+
+                            final Object[] params = req.receive();
+
+                            target = cl.getConstructor(paramTypes).newInstance(params);
+                        } else {
+                            target = cl.getConstructor().newInstance();
+                        }
+
+                    }
+                    singletons.put(name, target);
                 } catch (InstantiationException | IllegalAccessException
                         | IllegalArgumentException | InvocationTargetException
                         | NoSuchMethodException | SecurityException ex) {
                     throw new ClassInstantiationException("This class: "
-                            + cl.getName() + " creation failed: " + ex);
+                            + cl.getName() + " creation failed: " + ex.getMessage());
                 }
 
             }

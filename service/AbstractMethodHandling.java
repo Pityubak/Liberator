@@ -23,42 +23,47 @@
  */
 package com.pityubak.liberator.service;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import com.pityubak.liberator.config.DependencyConfig;
 import com.pityubak.liberator.lifecycle.InstanceService;
-import com.pityubak.liberator.misc.ModificationFlag;
-import com.pityubak.liberator.proxy.InjectionPipe;
-import com.pityubak.liberator.proxy.Pipe;
-import com.pityubak.liberator.proxy.ResponseProxy;
+import com.pityubak.liberator.misc.Insertion;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Pityubak
- * @since 2020.02.27
- * @version 1.0
  */
-public final class FieldInjectService implements ExecutorService<Field> {
+public final class AbstractMethodHandling {
 
-    private final InstanceService instanceService;
-    private final DetailsService service;
+    private final List<AbstractMethod> list = new ArrayList<>();
 
-    public FieldInjectService(InstanceService creator, DetailsService service) {
-        this.instanceService = creator;
+    private final InstanceService service;
+
+    public AbstractMethodHandling(InstanceService service) {
         this.service = service;
-
     }
 
-    @Override
-    public void inject(final Field f, final Object obj, final List<Class<?>> list, final ModificationFlag flag) {
-
-        final ResponseProxy responseService = new FieldResponseService(this.instanceService, obj, f);
-        final FieldInjectFinalizerService injService = new FieldInjectFinalizerService(service, responseService, obj);
-        final Pipe<Field> pipe = new InjectionPipe<Field>(list, this.service, injService)
-                .filter((t, q) -> t.isAnnotationPresent(q));
-
-        pipe.execute(f, flag);
-
+    public void registrate(final Class<?> parent, final Class<?> injectedClass, final Insertion insertion) {
+        final AbstractMethod method = this.list
+                .stream()
+                .filter(t -> t.getAbstrCls().equals(injectedClass) && t.getInsertion().equals(insertion))
+                .findFirst()
+                .orElse(null);
+        if (method == null) {
+            this.list.add(new AbstractMethod(parent, injectedClass, insertion));
+        }
     }
 
+    public boolean isPhaseExist(Insertion flag) {
+        return this.list.stream().noneMatch(t -> t.getInsertion().equals(flag));
+    }
+
+    public void removeAll() {
+        this.list.clear();
+    }
+
+    public void execute(Insertion flag) {
+        list.stream().filter(abs -> (abs.getInsertion().equals(flag))).forEachOrdered((abs) -> {
+            abs.execute(service);
+        });
+    }
 }

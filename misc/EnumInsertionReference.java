@@ -21,24 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
-
-import java.util.List;
+package com.pityubak.liberator.misc;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
  */
-public interface InstanceCollection {
+public interface EnumInsertionReference {
 
-    List<Class<?>> collect();
+    ModificationFlag getFlag();
 
-    void registerFilterClass(Class<?> cl);
+    boolean isAggregate();
 
-    void removeFilterClass(Class<?> cl);
-
-    void removeAll();
+    boolean isBeforeState();
 }

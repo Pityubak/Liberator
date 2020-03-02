@@ -23,42 +23,46 @@
  */
 package com.pityubak.liberator.service;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import com.pityubak.liberator.config.DependencyConfig;
 import com.pityubak.liberator.lifecycle.InstanceService;
-import com.pityubak.liberator.misc.ModificationFlag;
-import com.pityubak.liberator.proxy.InjectionPipe;
-import com.pityubak.liberator.proxy.Pipe;
-import com.pityubak.liberator.proxy.ResponseProxy;
+import com.pityubak.liberator.misc.Insertion;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Pityubak
- * @since 2020.02.27
- * @version 1.0
  */
-public final class FieldInjectService implements ExecutorService<Field> {
+public final class AbstractMethod {
 
-    private final InstanceService instanceService;
-    private final DetailsService service;
+    private final Class<?> parentCls;
+    private final Class<?> abstrCls;
+    private final Insertion insertion;
 
-    public FieldInjectService(InstanceService creator, DetailsService service) {
-        this.instanceService = creator;
-        this.service = service;
-
+    public AbstractMethod(Class<?> parentCls, Class<?> abstrCls, Insertion insertion) {
+        this.parentCls = parentCls;
+        this.abstrCls = abstrCls;
+        this.insertion = insertion;
     }
 
-    @Override
-    public void inject(final Field f, final Object obj, final List<Class<?>> list, final ModificationFlag flag) {
+    public void execute(final InstanceService service) {
+        final Object instance = service.createInstance(this.parentCls.getSimpleName(), this.parentCls);
+        for (Method m : this.abstrCls.getDeclaredMethods()) {
+            try {
+                m.invoke(instance, new Object[]{});
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Logger.getLogger(AbstractMethod.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 
-        final ResponseProxy responseService = new FieldResponseService(this.instanceService, obj, f);
-        final FieldInjectFinalizerService injService = new FieldInjectFinalizerService(service, responseService, obj);
-        final Pipe<Field> pipe = new InjectionPipe<Field>(list, this.service, injService)
-                .filter((t, q) -> t.isAnnotationPresent(q));
+    public Insertion getInsertion() {
+        return insertion;
+    }
 
-        pipe.execute(f, flag);
-
+    public Class<?> getAbstrCls() {
+        return abstrCls;
     }
 
 }

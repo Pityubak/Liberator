@@ -23,24 +23,13 @@
  */
 package com.pityubak.liberator.proxy;
 
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
+import com.pityubak.liberator.data.Response;
 
 /**
  *
  * @author Pityubak
- * @param <T>
  */
-public interface ConstraintStream<T> {
+public interface ResponseProxy {
 
-    ConstraintStream<T> filter(Predicate<? super T> predicate);
-
-    ConstraintStream<T> reduce(UnaryOperator<? super T> function);
-
-    <Q> ConstraintStream<T> reduce(Consumer<? super Q> function, Q value);
-
-    <R> ConstraintStream<T> reduce(Consumer<? super T> function, Predicate<? super R> predicate, R test);
-
-    T get();
+    Response create() throws IllegalAccessException;
 }

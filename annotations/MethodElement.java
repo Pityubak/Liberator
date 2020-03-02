@@ -23,7 +23,6 @@
  */
 package com.pityubak.liberator.annotations;
 
-import com.pityubak.liberator.misc.MethodFlag;
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -42,15 +41,9 @@ import java.lang.annotation.Target;
 public @interface MethodElement {
 
     /**
-     * 
-     * @return MethodFlag, specify, what data necessary from Liberator
-     * default:no parameter
-     */
-    MethodFlag value() default MethodFlag.WITH_NO_PARAMETER;
-
-    /**
-     * 
+     *
      * @return ModificationFlag enum, specify order of execution
      */
-    ModificationFlag flag() default ModificationFlag.PRIORITY_CREATION;
+    ModificationFlag value() default ModificationFlag.PRIORITY_CREATION;
+
 }

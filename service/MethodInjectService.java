@@ -1,57 +1,55 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * The MIT License
+ *
+ * Copyright 2019 Pityubak.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package com.pityubak.liberator.service;
 
-import com.pityubak.liberator.config.DependencyConfig;
-import com.pityubak.liberator.config.MethodDetails;
-import com.pityubak.liberator.exceptions.InjectionException;
-import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.misc.ModificationFlag;
-import com.pityubak.liberator.proxy.Machine;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
+import com.pityubak.liberator.proxy.InjectionPipe;
+import com.pityubak.liberator.proxy.Pipe;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  *
  * @author Pityubak Wrap source method in another
  */
-public class MethodInjectService {
+public final class MethodInjectService implements ExecutorService<Method> {
 
-    private final InstanceService instanceService;
-    private final DependencyConfig config;
+    private final DetailsService service;
 
-    public MethodInjectService(InstanceService instanceService, DependencyConfig config) {
-        this.instanceService = instanceService;
-        this.config = config;
+    public MethodInjectService(DetailsService service) {
+        this.service = service;
 
     }
 
-    public void inject(Class<?> loadedClass, Method targetMethod) {
-        this.config.getAnnotationList(ModificationFlag.PRIORITY_CREATION).forEach((anno) -> {
-            Class<? extends Annotation> type = anno.asSubclass(Annotation.class);
-            if (targetMethod.isAnnotationPresent(type)) {
-                try {
+    @Override
+    public void inject(final Method target, final Object obj, final List<Class<?>> list, final ModificationFlag flag) {
 
-                    //Make new instance of MethodDetails class through DependencyConfig
-                    MethodDetails detail = this.config.methodMapping(anno);
-                    //From stored data in MethodDetails
-                    Class<?> cl = detail.getClassName();
-                    Object instance = this.instanceService.createInstance(cl);
-                    Object target = this.instanceService.createInstance(loadedClass);
-                    Machine machine = (Machine) instance;
-                    machine.invoke(targetMethod.getAnnotation(type), target, targetMethod, targetMethod.getParameterTypes());
+        final InjectFinalizerService injService = new MethodInjectFinalizerService(service, obj);
+        final Pipe<Method> pipe = new InjectionPipe<Method>(list, this.service, injService)
+                .filter((t, q) -> t.isAnnotationPresent(q));
 
-                } catch (NoSuchMethodException | InstantiationException
-                        | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException ex) {
-                    throw new InjectionException("Injection failed : " + targetMethod.getName() + " : " + ex);
-                }
-            }
-        });
+        pipe.execute(target, flag);
 
     }
 

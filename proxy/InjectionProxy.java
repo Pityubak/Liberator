@@ -21,24 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.proxy;
 
-import java.util.List;
+import com.pityubak.liberator.misc.Insertion;
+import com.pityubak.liberator.misc.ModificationFlag;
+import com.pityubak.liberator.service.AbstractMethodHandling;
+import java.util.function.Consumer;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0
- * @see ClassInstanceCollection
  */
-public interface InstanceCollection {
+public final class InjectionProxy implements InjectionStream {
 
-    List<Class<?>> collect();
+    private final Consumer consumer;
 
-    void registerFilterClass(Class<?> cl);
+    private final AbstractMethodHandling methodHandling;
 
-    void removeFilterClass(Class<?> cl);
+    public InjectionProxy(Consumer consumer, AbstractMethodHandling methodHandling) {
+        this.consumer = consumer;
+        this.methodHandling = methodHandling;
+    }
 
-    void removeAll();
+    @Override
+    public void execute() {
+        for (Insertion ins : Insertion.values()) {
+            if (ins.isAggregate()) {
+                this.methodHandling.execute(ins);
+                if (ins.isBeforeState()) {
+                    final ModificationFlag flag = ins.getFlag();
+                    this.consumer.accept(flag);
+                }
+
+            }
+        }
+
+    }
 }
