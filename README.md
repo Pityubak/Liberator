@@ -43,7 +43,7 @@ public class AutoInjectorService {
     private final Map<String, Class<?>> map = new HashMap<>();
 
     @MethodElement
-    public  void mapInterface(Service service, Response response) {
+    public void mapInterface(Service service, Response response) {
         //information from target through response's getters
         final Class<?> type = response.getTargetType();
         final String injInterface = type.getInterfaces()[0].getSimpleName();
