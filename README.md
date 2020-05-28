@@ -1,10 +1,19 @@
 # Liberator
 Java injection tool that helps create custom annotation library.
 
+### History
+
+- 0.3 adding basic configuration support
+- 0.2 same logic, but Liberator became more robust and flexible
+- 0.1 initial version
+
+Next version: error handling and logging
+
 ## Overview
 
 Liberator use "method-first" approach, the method determines which annotation belongs to.
 So let see, how Liberator works in working example (AutoInjector) :
+
 
 
 ### First step:
@@ -27,7 +36,7 @@ public @interface AutoInject {
 
 
 ### Second step:
-Liberator has two annotation, @MethodBox marks the class, in wich method is located and @MethodElement, that marks the method.\
+Liberator has two annotation, @MethodBox marks the class, in which method is located and @MethodElement, that marks the method.\
 @MethodElement annotation has an enum value(ModificationFlag).\
 This enum tells to Liberator, when injection should happen.\
 Liberator has four injection phase:Creation, High, Normal and Low.\
@@ -106,12 +115,29 @@ public class Context {
 }
 ~~~
 
-This is basic operations from Liberator, but it can inject some abstract method. \
-Insertion  is possible before and after each phase, or each class. Note:abstract method's type must to be \
-void without parameter.
-~~~java
-   //Parameters'order : concrete class, interface, and Insertion enum
-   this.liberator.registerAbstractMethod(XmlWriteScoutService.class, Scout.class, Insertion.AFTER_LOW);
+### Fourth(optional) step:
+Create config class, and set filter and registrate abstraction.
+
+~~~
+@Config(XmlReadScout.class)
+public class XmlReadScoutConfig implements ConfigurationService {
+
+    @Override
+    public void filter(CollectionConfigurationLayer collection) {
+        ConfigurationService.super.filter(collection);
+        
+        collection.filter(XmlWriteService.class, 
+           XmlWriteScoutService.class, XmlWriteScout.class, XmlReadService.class);
+    }
+    
+    @Override
+    public void registerAbstractMethod(MethodConfigurationLayer handler) {
+        ConfigurationService.super.registerAbstractMethod(handler);
+        
+        handler.registrate(XmlReadScoutService.class, Scout.class, Insertion.AFTER_LOW);
+    }
+    
+}
 ~~~
 
 
