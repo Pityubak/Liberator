@@ -27,11 +27,11 @@ public @interface AutoInject {
 
 
 ### Second step:
-Liberator has two annotation, @MethodBox marks the class, in wich method is located\
-and @MethodElement, that marks the method. @MethodElement annotation has an enum value(ModificationFlag).\
+Liberator has two annotation, @MethodBox marks the class, in wich method is located and @MethodElement, that marks the method.\
+@MethodElement annotation has an enum value(ModificationFlag).\
 This enum tells to Liberator, when injection should happen.\
 Liberator has four injection phase:Creation, High, Normal and Low.\
-Parameter of method always must to be in first place our annotation \
+Parameter of method always must to be in first place custom annotation \
 and in second place Liberator's special class: Response. Response contains some information \
 from target of injection(for example:type, value).
 
@@ -43,7 +43,7 @@ public class AutoInjectorService {
     private final Map<String, Class<?>> map = new HashMap<>();
 
     @MethodElement
-    public <T> void mapInterface(Service service, Response response) {
+    public void mapInterface(Service service, Response response) {
         //information from target through response's getters
         final Class<?> type = response.getTargetType();
         final String injInterface = type.getInterfaces()[0].getSimpleName();
@@ -110,7 +110,7 @@ This is basic operations from Liberator, but it can inject some abstract method.
 Insertion  is possible before and after each phase, or each class. Note:abstract method's type must to be \
 void without parameter.
 ~~~java
-   //Parameters'order is concrete class, interface, and Insertion enum
+   //Parameters'order : concrete class, interface, and Insertion enum
    this.liberator.registerAbstractMethod(XmlWriteScoutService.class, Scout.class, Insertion.AFTER_LOW);
 ~~~
 
