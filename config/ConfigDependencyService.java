@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2019 Pityubak.
+ * Copyright 2020 Pityubak.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,33 +23,30 @@
  */
 package com.pityubak.liberator.config;
 
-import com.pityubak.liberator.misc.ModificationFlag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
+ * @since 2020.05.18
  * @version 1.0
- * @see DependencyConfig
+ *
  */
-public final class MethodDependencyConfig implements DependencyConfig {
+public class ConfigDependencyService implements Dependency<ConfigDetails> {
 
-    private final List<MethodDetails> methodDetailsList = new ArrayList<>();
+    private final List<ConfigDetails> list = new ArrayList<>();
 
     @Override
-    public void createMethodMapping(final MethodDetails details) {
-        methodDetailsList.add(details);
+    public void createMapping(ConfigDetails details) {
+        this.list.add(details);
     }
 
     @Override
-    public MethodDetails methodMapping(final Class<?> cl, final ModificationFlag flag) {
-
-        final MethodDetails base = this.get(flag).stream()
-                .filter(x -> x.getAnnotation().equals(cl))
+    public ConfigDetails mapping(Class<?> cl) {
+        final ConfigDetails base = this.list.stream()
+                .filter(x -> x.getTargetClass().equals(cl))
                 .findFirst()
                 .orElse(null);
 
@@ -60,32 +57,9 @@ public final class MethodDependencyConfig implements DependencyConfig {
         return base;
     }
 
-    /**
-     *
-     * @param flag, type:ModificationFlag
-     * @return MethodDetails list
-     */
-    private List<MethodDetails> get(final ModificationFlag flag) {
-
-        final List<MethodDetails> list = new ArrayList<>();
-        this.methodDetailsList.forEach(el -> {
-            if (el.getModFlag().equals(flag)) {
-                list.add(el);
-
-            }
-        });
-        return list;
-    }
-
-    @Override
-    public List<Class<?>> getAnnotationList(final ModificationFlag flag) {
-
-        return get(flag).stream().map(MethodDetails::getAnnotation).collect(Collectors.toList());
-    }
-
     @Override
     public void removeMapping() {
-        this.methodDetailsList.clear();
+        this.list.clear();
     }
 
 }

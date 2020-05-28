@@ -23,11 +23,11 @@
  */
 package com.pityubak.liberator.service;
 
-import com.pityubak.liberator.config.DependencyConfig;
 import com.pityubak.liberator.config.MethodDetails;
 import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.lang.reflect.Method;
+import com.pityubak.liberator.config.MethodDependency;
 
 /**
  *
@@ -35,27 +35,27 @@ import java.lang.reflect.Method;
  */
 public final class MethodDetailsService implements DetailsService {
 
-    private final DependencyConfig config;
+    private final MethodDependency config;
 
     private final InstanceService service;
 
     private MethodDetails detail;
 
-    public MethodDetailsService(DependencyConfig config, InstanceService service) {
+    public MethodDetailsService(MethodDependency config, InstanceService service) {
         this.config = config;
         this.service = service;
     }
 
     @Override
     public Object processInstance() {
-        final Class<?> cls = detail.getClassName();
+        final Class<?> cls = detail.getConcreteClass();
 
         return this.service.createInstance(cls.getSimpleName(), cls);
     }
 
     @Override
     public Method processMethod() throws NoSuchMethodException {
-        final Class<?> cl = detail.getClassName();
+        final Class<?> cl = detail.getConcreteClass();
 
         Class<?>[] params = new Class<?>[detail.getParams().size()];
         params = detail.getParams().toArray(params);

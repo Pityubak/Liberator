@@ -25,7 +25,6 @@ package com.pityubak.liberator;
 
 import com.pityubak.liberator.proxy.InjectConsumer;
 import com.pityubak.liberator.service.InjectionService;
-import com.pityubak.liberator.config.DependencyConfig;
 import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.proxy.InjectionProxy;
 import com.pityubak.liberator.proxy.InjectionStream;
@@ -35,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import com.pityubak.liberator.config.MethodDependency;
 
 /**
  * Container handles all operation
@@ -46,12 +46,12 @@ import java.util.function.Consumer;
 public class Container {
 
     private final InstanceService instanceService;
-    private final DependencyConfig config;
+    private final MethodDependency config;
     private final InjectionService injectionService;
     private final AbstractMethodHandling methodHandling;
     private final DetailsService detailsService;
 
-    public Container(InstanceService instanceService, DependencyConfig config,
+    public Container(InstanceService instanceService, MethodDependency config,
             DetailsService detailsService, AbstractMethodHandling methodHandling) {
         this.instanceService = instanceService;
         this.config = config;

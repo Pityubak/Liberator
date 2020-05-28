@@ -21,21 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.config;
 
+import com.pityubak.liberator.misc.ModificationFlag;
 import java.util.List;
 
 /**
  *
  * @author Pityubak
- * @since 2020.05.20
- * @version 1.1
- * @see ClassInstanceCollection
+ * @since 2020.05.03
+ * @version 1.2
+ * @see MethodDependencyConfig
  */
-public interface InstanceCollection {
+public interface MethodDependency {
 
-    List<Class<?>> collect();
-    
-    void removeAll();
+    MethodDetails methodMapping(Class<?> cl, ModificationFlag flag);
 
+    List<Class<?>> getAnnotationList(ModificationFlag flag);
+
+    void createMethodMapping(MethodDetails details);
+
+    void removeMapping();
 }

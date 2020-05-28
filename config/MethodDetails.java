@@ -29,14 +29,14 @@ import java.util.List;
 /**
  *
  * @author Pityubak
- * @since 2019.09.20
- * @version 1.0 Data wrapper
+ * @since 2020.04.10
+ * @version 1.1 Data wrapper
  */
 public final class MethodDetails {
 
     private final String methodName;
 
-    private final Class<?> className;
+    private final Class<?> concreteClass;
 
     private final Class<?> annotation;
 
@@ -46,21 +46,29 @@ public final class MethodDetails {
 
     private final List<String> fieldNames;
 
+    private final String simpleName;
+
     private MethodDetails(Builder builder) {
         this.methodName = builder.methodName;
-        this.className = builder.className;
+        this.concreteClass = builder.className;
         this.annotation = builder.annotation;
         this.params = builder.params;
         this.modFlag = builder.modFlag;
         this.fieldNames = builder.fieldNames;
+        this.simpleName = builder.simpleName;
     }
+
+    public String getSimpleName() {
+        return simpleName;
+    }
+    
 
     public String getMethodName() {
         return methodName;
     }
 
-    public Class<?> getClassName() {
-        return className;
+    public Class<?> getConcreteClass() {
+        return concreteClass;
     }
 
     public Class<?> getAnnotation() {
@@ -93,6 +101,8 @@ public final class MethodDetails {
 
         private List<String> fieldNames;
 
+        private String simpleName;
+
         public Builder withFieldNames(List<String> fieldNames) {
             this.fieldNames = fieldNames;
             return this;
@@ -120,6 +130,11 @@ public final class MethodDetails {
 
         public Builder withModificationFlag(ModificationFlag modFlag) {
             this.modFlag = modFlag;
+            return this;
+        }
+
+        public Builder withSimpleName(String simpleName) {
+            this.simpleName = simpleName;
             return this;
         }
 

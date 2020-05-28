@@ -27,7 +27,7 @@ import com.pityubak.liberator.annotations.MethodBox;
 import com.pityubak.liberator.annotations.MethodElement;
 import com.pityubak.liberator.config.MethodDetails;
 import java.lang.reflect.Method;
-import com.pityubak.liberator.config.DependencyConfig;
+import com.pityubak.liberator.config.MethodDependency;
 
 /**
  *
@@ -36,18 +36,19 @@ import com.pityubak.liberator.config.DependencyConfig;
  * @version 1.1 Make MethodDetails class and store it
  *
  */
-public final class AnnotationCollection {
+public final class AnnotationCollection implements PreProcessing {
 
-    private final DependencyConfig methodConfig;
+    private final MethodDependency methodConfig;
 
     private final InstanceCollection collection;
 
-    public AnnotationCollection(final DependencyConfig methodConfig, final InstanceCollection collection) {
+    public AnnotationCollection(MethodDependency methodConfig, InstanceCollection collection) {
         this.methodConfig = methodConfig;
         this.collection = collection;
     }
 
-    public void collectAnnotation() {
+    @Override
+    public void collect() {
         this.collection.collect().forEach(this::registerMethodObject);
     }
 
@@ -81,6 +82,7 @@ public final class AnnotationCollection {
                     .withParams(paramType)
                     .withAnnotation(paramType[0])
                     .withModificationFlag(element.value())
+                    .withSimpleName(loadedClass.getSimpleName())
                     .build();
             methodConfig.createMethodMapping(details);
 

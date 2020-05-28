@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2019 Pityubak.
+ * Copyright 2020 Pityubak.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,21 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
-
-import java.util.List;
+package com.pityubak.liberator.config;
 
 /**
  *
  * @author Pityubak
- * @since 2020.05.20
- * @version 1.1
- * @see ClassInstanceCollection
+ * @since 2020.05.22
+ * @version 1.0
+ *
  */
-public interface InstanceCollection {
+public class MainResolverService implements Resolver {
 
-    List<Class<?>> collect();
+    private final Resolver configService;
     
-    void removeAll();
+    private final Resolver methodService;
 
+    public MainResolverService(Resolver configService, Resolver methodService) {
+        this.configService = configService;
+        this.methodService = methodService;
+    }
+    
+    
+    @Override
+    public void resolve(Class<?> cl) {
+        this.configService.resolve(cl);
+        this.methodService.resolve(cl);
+    }
+    
 }

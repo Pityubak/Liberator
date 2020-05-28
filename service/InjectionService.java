@@ -26,12 +26,12 @@ package com.pityubak.liberator.service;
 import com.pityubak.liberator.exceptions.InjectionException;
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.lang.reflect.Field;
-import com.pityubak.liberator.config.DependencyConfig;
 import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.misc.Insertion;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
+import com.pityubak.liberator.config.MethodDependency;
 
 /**
  *
@@ -46,13 +46,13 @@ public class InjectionService implements Injection {
     private final ClassInjectionService inspector;
     private final FieldInjectService fieldService;
     private final InstanceService instanceService;
-    private final DependencyConfig config;
+    private final MethodDependency config;
     private final AbstractMethodHandling methodHandling;
     private final DetailsService service;
     private final MethodInjectService methodService;
 
     public InjectionService(InstanceService instanceService,
-            DependencyConfig config, DetailsService service,
+            MethodDependency config, DetailsService service,
             AbstractMethodHandling methodHandling) {
         this.instanceService = instanceService;
         this.service = service;

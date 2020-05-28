@@ -29,45 +29,41 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import com.pityubak.liberator.layer.CollectionConfigurationLayer;
 
 /**
  *
  * @author Pityubak
- * @since 2019.9.20
+ * @since 2020.05.20
  * @see InstanceCollection
- * @version 1.0 It collect all annotations, what are annotated with Register and
- * all classes and methods, where MethodBox/MethodElement annotations are
- * present.
  */
-public final class ClassInstanceCollection implements InstanceCollection {
+public final class ClassInstanceCollection implements InstanceCollection,CollectionConfigurationLayer {
 
     private final Data classData;
     private final Class<?> entryClass;
 
     private final List<Class<?>> filter = new ArrayList<>();
 
+    private final List<Class<?>> cache = new ArrayList<>();
+
     public ClassInstanceCollection(final Data finder, final Class<?> entryClass) {
         this.classData = finder;
         this.entryClass = entryClass;
-
+        this.preCollect();
     }
 
+    /**
+     * 
+     * @param args, Class<?> array-skipping classes
+     */
     @Override
-    public void registerFilterClass(Class<?> cl) {
-
-        if (!this.filter.contains(cl)) {
-            this.filter.add(cl);
-        }
-
+    public void filter(Class<?>... args) {
+        this.filter.addAll(Arrays.asList(args));
     }
 
-    @Override
-    public void removeFilterClass(final Class<?> cl) {
-        if (this.filter.contains(cl)) {
-            this.filter.remove(cl);
-        }
-    }
 
     @Override
     public void removeAll() {
@@ -80,8 +76,13 @@ public final class ClassInstanceCollection implements InstanceCollection {
      */
     @Override
     public List<Class<?>> collect() {
+        return this.cache.stream()
+                .filter(t -> !this.filter.contains(t))
+                .collect(Collectors.toList());
+    }
 
-        final List<Class<?>> classList = new ArrayList<>();
+    private void preCollect() {
+
         final String packageName = this.entryClass.getPackage().getName();
         classData.getPathList().stream().map(Path::toString)
                 .filter(fileName -> fileName.endsWith(".class"))
@@ -92,18 +93,12 @@ public final class ClassInstanceCollection implements InstanceCollection {
                     neededPart = neededPart.replace("\\", ".");
                     try {
                         final Class<?> loadedClass = Class.forName(packageName + neededPart);
-
-                        if (!this.filter.contains(loadedClass)) {
-                            classList.add(loadedClass);
-
-                        }
-
+                        this.cache.add(loadedClass);
                     } catch (ClassNotFoundException ex) {
                         Logger.getLogger(ClassInstanceCollection.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
                 });
-        return classList;
-    }
 
+    }
 }

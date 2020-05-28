@@ -66,9 +66,8 @@ public final class SingletonInstanceService implements InstanceService {
                 try {
                     for (Constructor constructor : cl.getDeclaredConstructors()) {
                         final Class<?>[] paramTypes = constructor.getParameterTypes();
-                        final ParameterInterception req = this.interception.getRequiredArgs(cl);
+                        final ParameterInterception req = this.interception.getRequiredArgs(cl); 
                         if (req != null) {
-
                             final Object[] params = req.receive();
 
                             target = cl.getConstructor(paramTypes).newInstance(params);

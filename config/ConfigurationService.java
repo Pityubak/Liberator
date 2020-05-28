@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2019 Pityubak.
+ * Copyright 2020 Pityubak.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,21 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.config;
 
-import java.util.List;
+import com.pityubak.liberator.layer.CollectionConfigurationLayer;
+import com.pityubak.liberator.layer.MethodConfigurationLayer;
 
 /**
  *
  * @author Pityubak
- * @since 2020.05.20
- * @version 1.1
- * @see ClassInstanceCollection
+ * @since 2020.05.12
+ * @version 1.0
+ *
  */
-public interface InstanceCollection {
+public interface ConfigurationService {
 
-    List<Class<?>> collect();
-    
-    void removeAll();
+    default void filter(CollectionConfigurationLayer collection) {
+        System.out.println("Default Configuration");
+    }
 
+    default void registerAbstractMethod(MethodConfigurationLayer methods) {
+        System.out.println("Default Method registration");
+    }
+;
 }

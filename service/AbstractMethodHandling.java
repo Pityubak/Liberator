@@ -27,12 +27,16 @@ import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.misc.Insertion;
 import java.util.ArrayList;
 import java.util.List;
+import com.pityubak.liberator.layer.MethodConfigurationLayer;
 
 /**
  *
  * @author Pityubak
+ * @since 2020.05.17
+ * @version 1.0
+ *
  */
-public final class AbstractMethodHandling {
+public final class AbstractMethodHandling implements MethodConfigurationLayer{
 
     private final List<AbstractMethod> list = new ArrayList<>();
 
@@ -42,7 +46,8 @@ public final class AbstractMethodHandling {
         this.service = service;
     }
 
-    public void registrate(final Class<?> parent, final Class<?> injectedClass, final Insertion insertion) {
+    @Override
+    public MethodConfigurationLayer registrate(final Class<?> parent, final Class<?> injectedClass, final Insertion insertion) {
         final AbstractMethod method = this.list
                 .stream()
                 .filter(t -> t.getAbstrCls().equals(injectedClass) && t.getInsertion().equals(insertion))
@@ -51,9 +56,10 @@ public final class AbstractMethodHandling {
         if (method == null) {
             this.list.add(new AbstractMethod(parent, injectedClass, insertion));
         }
+        return this;
     }
 
-    public boolean isPhaseExist(Insertion flag) {
+    boolean isPhaseExist(Insertion flag) {
         return this.list.stream().noneMatch(t -> t.getInsertion().equals(flag));
     }
 

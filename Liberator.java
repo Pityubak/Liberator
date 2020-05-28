@@ -25,79 +25,96 @@ package com.pityubak.liberator;
 
 import com.pityubak.liberator.builder.AnnotationCollection;
 import com.pityubak.liberator.builder.ClassInstanceCollection;
+import com.pityubak.liberator.builder.PreProcessingService;
 
 import com.pityubak.liberator.builder.StartupData;
-import com.pityubak.liberator.config.MethodDependencyConfig;
+import com.pityubak.liberator.config.MethodDependencyService;
 
 import com.pityubak.liberator.lifecycle.SingletonInstanceService;
 import java.util.List;
 import com.pityubak.liberator.builder.Data;
 import com.pityubak.liberator.builder.InstanceCollection;
-import com.pityubak.liberator.config.DependencyConfig;
+import com.pityubak.liberator.builder.PreProcessing;
+import com.pityubak.liberator.config.ConfigResolverService;
+import com.pityubak.liberator.config.Dependency;
+import com.pityubak.liberator.config.ConfigDependencyService;
+import com.pityubak.liberator.config.MainResolverService;
 import com.pityubak.liberator.config.ParameterInterceptionHandling;
 import com.pityubak.liberator.data.Interception;
 import com.pityubak.liberator.data.Request;
 import com.pityubak.liberator.lifecycle.InstanceService;
-import com.pityubak.liberator.misc.Insertion;
 import com.pityubak.liberator.service.AbstractMethodHandling;
 import com.pityubak.liberator.service.DetailsService;
 import com.pityubak.liberator.service.MethodDetailsService;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.pityubak.liberator.config.MethodDependency;
+import com.pityubak.liberator.config.MethodResolverService;
+import com.pityubak.liberator.config.Resolver;
+import com.pityubak.liberator.layer.CollectionConfigurationLayer;
 
 /**
  *
  * @author Pityubak
- * @since 2020.02.20
- * @version 1.1
+ * @since 2020.05.26
+ * @version 1.2
  */
 public final class Liberator {
 
     private final InstanceService instanceService;
     private final Container container;
     private final InstanceCollection classCollection;
-    private final DependencyConfig config;
-    private final Data startupData;
+    private final MethodDependency methodDependency;
 
+    private final Dependency configDependency;
+    private final Data startupData;
+    private final Resolver configResolving;
+    private final Resolver methodResolving;
+    private final Resolver mainResolver;
     private final DetailsService detailsService;
     private final AbstractMethodHandling methodHandling;
 
     private final ParameterInterceptionHandling fieldHandling;
 
-    private final AnnotationCollection collection;
+    private final PreProcessing collection;
+
+    private final PreProcessing preProcessor;
 
     public Liberator(final Class<?> cl) {
         this.fieldHandling = new ParameterInterceptionHandling();
         this.instanceService = new SingletonInstanceService(this.fieldHandling);
         this.startupData = new StartupData(cl.getResource(cl.getSimpleName() + ".class").getPath());
+        this.configDependency = new ConfigDependencyService();
 
         this.classCollection = new ClassInstanceCollection(this.startupData, cl);
-        this.config = new MethodDependencyConfig();
+        this.preProcessor = new PreProcessingService(this.configDependency, this.classCollection);
+        this.methodDependency = new MethodDependencyService();
+
         this.methodHandling = new AbstractMethodHandling(this.instanceService);
-        this.detailsService = new MethodDetailsService(this.config, this.instanceService);
-        this.collection = new AnnotationCollection(this.config, this.classCollection);
-        this.container = new Container(this.instanceService, this.config, this.detailsService, this.methodHandling);
+        this.configResolving = new ConfigResolverService(this.configDependency, 
+                (CollectionConfigurationLayer) this.classCollection, this.instanceService, this.methodHandling);
+        this.methodResolving = new MethodResolverService(this.methodDependency);
+        this.mainResolver = new MainResolverService(this.configResolving, this.methodResolving);
+        this.detailsService = new MethodDetailsService(this.methodDependency, this.instanceService);
+        this.collection = new AnnotationCollection(this.methodDependency, this.classCollection);
+        this.container = new Container(this.instanceService, this.methodDependency, this.detailsService, this.methodHandling);
+        this.preProcessor.collect();
 
     }
 
     /**
      * Require to proper running of Liberator.Always it's neccesary to call
      * before inject.
+     *
+     * @param cl
      */
-    public void init() {
-
-        this.collection.collectAnnotation();
+    public void init(final Class<?> cl) {
+        this.mainResolver.resolve(cl);
+        this.collection.collect();
     }
 
-    /**
-     * Reset Liberator's setting.
-     */
-    public void reset() {
-        this.classCollection.removeAll();
-        this.config.removeMapping();
-        this.methodHandling.removeAll();
-    }
+
 
     /**
      * Interception registration
@@ -107,24 +124,6 @@ public final class Liberator {
      */
     public void registerInterception(final Interception interception) {
         this.fieldHandling.registrate(interception);
-    }
-
-    /**
-     *
-     * @param cl ,which Liberator should ignore.
-     */
-    public void addFilter(final Class<?> cl) {
-        this.classCollection.registerFilterClass(cl);
-    }
-
-    /**
-     *
-     * @param parent- target class
-     * @param cl--single method interface/abtract class
-     * @param insertion -Insertion, it shows that when it inject
-     */
-    public void registerAbstractMethod(final Class<?> parent, final Class<?> cl, final Insertion insertion) {
-        this.methodHandling.registrate(parent, cl, insertion);
     }
 
     /**
@@ -168,7 +167,7 @@ public final class Liberator {
      *
      * @param classes
      */
-    public void inject(final Class<?>[] classes) {
+    public void inject(final Class<?> ...classes) {
         final Map<String, Class<?>> map = new HashMap<>();
         for (Class<?> cl : classes) {
             map.put(cl.getSimpleName(), cl);

@@ -25,7 +25,6 @@ package com.pityubak.liberator.service;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import com.pityubak.liberator.config.DependencyConfig;
 import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.misc.ModificationFlag;
 import com.pityubak.liberator.proxy.InjectionPipe;

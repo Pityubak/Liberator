@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2019 Pityubak.
+ * Copyright 2020 Pityubak.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,24 +23,30 @@
  */
 package com.pityubak.liberator.config;
 
-import com.pityubak.liberator.misc.ModificationFlag;
-import java.util.List;
-
 /**
  *
  * @author Pityubak
- * @since 2020.01.12
- * @version 1.1
- * @see MethodDependencyConfig
+ * @since 2020.05.12
+ * @version 1.0
+ *
  */
-public interface DependencyConfig {
+public final class ConfigDetails {
 
-    MethodDetails methodMapping(Class<?> cl, ModificationFlag flag);
+    private final Class<?> targetClass;
 
-    List<Class<?>> getAnnotationList(ModificationFlag flag);
+    private final Class<?> service;
 
-    void createMethodMapping(MethodDetails details);
+    public ConfigDetails(Class<?> targetClass, Class<?> service) {
+        this.targetClass = targetClass;
+        this.service = service;
+    }
 
-    void removeMapping();
+    public Class<?> getTargetClass() {
+        return targetClass;
+    }
+
+    public Class<?> getService() {
+        return service;
+    }
 
 }
