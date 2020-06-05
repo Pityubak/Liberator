@@ -116,25 +116,29 @@ public class Context {
 ~~~
 
 ### Fourth(optional) step:
-Create config class, and set filter and registrate abstraction.
+Create config class, and set filter and registrate abstraction. This is one of the XMlGrinder's Config files.
 
 ~~~
-@Config(XmlReadScout.class)
-public class XmlReadScoutConfig implements ConfigurationService {
+@Config(XmlWrite.class)
+public class XmlWriteConfig implements ConfigurationService {
 
     @Override
     public void filter(CollectionConfigurationLayer collection) {
-        ConfigurationService.super.filter(collection);
+        ConfigurationService.super.filter(collection); 
         
-        collection.filter(XmlWriteService.class, 
-           XmlWriteScoutService.class, XmlWriteScout.class, XmlReadService.class);
+        collection.filter(XmlWriteScoutService.class, XmlReadService.class, XmlReadScoutService.class);
+        
     }
     
     @Override
     public void registerAbstractMethod(MethodConfigurationLayer handler) {
-        ConfigurationService.super.registerAbstractMethod(handler);
-        
-        handler.registrate(XmlReadScoutService.class, Scout.class, Insertion.AFTER_LOW);
+        ConfigurationService.super.registerAbstractMethod(handler); 
+
+        handler
+                .registrate(XmlWriteService.class, Writeable.class, Insertion.AFTER_LOW)
+                .registrate(XmlWriteService.class, Establishing.class, Insertion.PER_CLASS_HIGH)
+                .registrate(XmlWriteService.class, CounterResetable.class, Insertion.BEFORE_NORMAL)
+                .registrate(XmlWriteService.class, NodeCountable.class, Insertion.PER_CLASS_NORMAL);
     }
     
 }
