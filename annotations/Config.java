@@ -8,8 +8,6 @@ import java.lang.annotation.Target;
 /**
  *
  * @author Pityubak
- * @since 2020.05.12
- * @version 1.0
  *
  */
 @Retention(RetentionPolicy.RUNTIME)

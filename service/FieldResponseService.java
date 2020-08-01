@@ -1,31 +1,8 @@
-/*
- * The MIT License
- *
- * Copyright 2019 Pityubak.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package com.pityubak.liberator.service;
 
+import com.pityubak.founder.Founder;
 import com.pityubak.liberator.data.Request;
 import com.pityubak.liberator.data.Response;
-import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.proxy.BuilderProxy;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -44,14 +21,14 @@ import com.pityubak.liberator.proxy.VirtualResponse;
  */
 public final class FieldResponseService implements ResponseProxy {
 
-    private final InstanceService service;
+    private final Founder founder;
 
     private final Object caller;
 
     private final Field targetField;
 
-    public FieldResponseService(InstanceService service, Object caller, Field targetField) {
-        this.service = service;
+    public FieldResponseService(Founder founder, Object caller, Field targetField) {
+        this.founder=founder;
         this.caller = caller;
         this.targetField = targetField;
     }
@@ -84,7 +61,7 @@ public final class FieldResponseService implements ResponseProxy {
         return BuilderProxy.of(VirtualResponse::new)
                 .with(VirtualResponse::setTargetName, this.targetField.getName())
                 .with(VirtualResponse::setValue, this.targetField.get(caller))
-                .with(VirtualResponse::setRequest, new Request(this.service))
+                .with(VirtualResponse::setRequest, new Request(founder))
                 .with(VirtualResponse::setCallerClassFullName, this.caller.toString())
                 .with(VirtualResponse::setCallerClassSimpleName, caller.getClass().getSimpleName())
                 .with(VirtualResponse::setTargetType, this.targetField.getType())

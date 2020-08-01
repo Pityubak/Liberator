@@ -1,48 +1,22 @@
-/*
- * The MIT License
- *
- * Copyright 2019 Pityubak.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package com.pityubak.liberator;
 
-import com.pityubak.liberator.builder.AnnotationCollection;
-import com.pityubak.liberator.builder.ClassInstanceCollection;
-import com.pityubak.liberator.builder.PreProcessingService;
+import com.pityubak.collier.Collier;
+import com.pityubak.collier.misc.ParsingTarget;
+import com.pityubak.founder.Founder;
+import com.pityubak.founder.data.Parameter;
+import com.pityubak.liberator.builder.ConfigProcessor;
+import com.pityubak.liberator.builder.MethodProcessor;
+import com.pityubak.liberator.config.ClassFilter;
 
-import com.pityubak.liberator.builder.StartupData;
 import com.pityubak.liberator.config.MethodDependencyService;
 
-import com.pityubak.liberator.lifecycle.SingletonInstanceService;
 import java.util.List;
-import com.pityubak.liberator.builder.Data;
-import com.pityubak.liberator.builder.InstanceCollection;
-import com.pityubak.liberator.builder.PreProcessing;
 import com.pityubak.liberator.config.ConfigResolverService;
 import com.pityubak.liberator.config.Dependency;
 import com.pityubak.liberator.config.ConfigDependencyService;
+import com.pityubak.liberator.config.Filter;
 import com.pityubak.liberator.config.MainResolverService;
-import com.pityubak.liberator.config.ParameterInterceptionHandling;
-import com.pityubak.liberator.data.Interception;
 import com.pityubak.liberator.data.Request;
-import com.pityubak.liberator.lifecycle.InstanceService;
 import com.pityubak.liberator.service.AbstractMethodHandling;
 import com.pityubak.liberator.service.DetailsService;
 import com.pityubak.liberator.service.MethodDetailsService;
@@ -52,122 +26,87 @@ import java.util.Map;
 import com.pityubak.liberator.config.MethodDependency;
 import com.pityubak.liberator.config.MethodResolverService;
 import com.pityubak.liberator.config.Resolver;
+import java.util.Collections;
+import com.pityubak.liberator.layer.CollectionConfiguration;
 import com.pityubak.liberator.layer.CollectionConfigurationLayer;
 
 /**
  *
  * @author Pityubak
- * @since 2020.05.26
- * @version 1.2
  */
 public final class Liberator {
 
-    private final InstanceService instanceService;
+    private final Founder founder;
+    private final Collier collier;
     private final Container container;
-    private final InstanceCollection classCollection;
     private final MethodDependency methodDependency;
 
     private final Dependency configDependency;
-    private final Data startupData;
-    private final Resolver configResolving;
-    private final Resolver methodResolving;
+    private final Resolver configResolver;
+    private final Resolver methodResolver;
     private final Resolver mainResolver;
     private final DetailsService detailsService;
-    private final AbstractMethodHandling methodHandling;
+    private final AbstractMethodHandling methodHandler;
+    private final ConfigProcessor configProcessor;
+    private final MethodProcessor methodProcessor;
 
-    private final ParameterInterceptionHandling fieldHandling;
-
-    private final PreProcessing collection;
-
-    private final PreProcessing preProcessor;
+    private final CollectionConfiguration colleectionConfiguration;
+    private final Filter filter;
 
     public Liberator(final Class<?> cl) {
-        this.fieldHandling = new ParameterInterceptionHandling();
-        this.instanceService = new SingletonInstanceService(this.fieldHandling);
-        this.startupData = new StartupData(cl.getResource(cl.getSimpleName() + ".class").getPath());
+        this.founder = new Founder();
+        this.collier = new Collier(cl, ParsingTarget.CLASS_FILE);
+        this.filter = new ClassFilter(collier);
+        this.colleectionConfiguration = new CollectionConfigurationLayer(filter);
         this.configDependency = new ConfigDependencyService();
 
-        this.classCollection = new ClassInstanceCollection(this.startupData, cl);
-        this.preProcessor = new PreProcessingService(this.configDependency, this.classCollection);
+        this.configProcessor = new ConfigProcessor(this.configDependency);
         this.methodDependency = new MethodDependencyService();
-
-        this.methodHandling = new AbstractMethodHandling(this.instanceService);
-        this.configResolving = new ConfigResolverService(this.configDependency, 
-                (CollectionConfigurationLayer) this.classCollection, this.instanceService, this.methodHandling);
-        this.methodResolving = new MethodResolverService(this.methodDependency);
-        this.mainResolver = new MainResolverService(this.configResolving, this.methodResolving);
-        this.detailsService = new MethodDetailsService(this.methodDependency, this.instanceService);
-        this.collection = new AnnotationCollection(this.methodDependency, this.classCollection);
-        this.container = new Container(this.instanceService, this.methodDependency, this.detailsService, this.methodHandling);
-        this.preProcessor.collect();
+        this.methodProcessor = new MethodProcessor(methodDependency);
+        this.methodHandler = new AbstractMethodHandling(founder);
+        this.configResolver = new ConfigResolverService(this.configDependency,
+                this.colleectionConfiguration, founder, this.methodHandler);
+        this.methodResolver = new MethodResolverService(this.methodDependency);
+        this.mainResolver = new MainResolverService(this.configResolver, this.methodResolver);
+        this.detailsService = new MethodDetailsService(this.methodDependency, founder);
+        this.container = new Container(founder, this.methodDependency, this.detailsService, this.methodHandler);
+        this.filter.getFinalClassList().forEach(t -> {
+            configProcessor.registerConfigObject((Class<?>) t);
+        });
 
     }
 
-    /**
-     * Require to proper running of Liberator.Always it's neccesary to call
-     * before inject.
-     *
-     * @param cl
-     */
     public void init(final Class<?> cl) {
         this.mainResolver.resolve(cl);
-        this.collection.collect();
+        filter.getFinalClassList().forEach(t -> {
+            methodProcessor.registerMethodObject((Class<?>) t);
+        });
+
     }
 
+    public void registerParameterForInit(final Class<?> cls, final Parameter prm) {
+        founder.registerParameter(cls, prm);
 
-
-    /**
-     * Interception registration
-     *
-     * @param interception
-     *
-     */
-    public void registerInterception(final Interception interception) {
-        this.fieldHandling.registrate(interception);
     }
 
-    /**
-     *
-     * @param mainClass
-     * @return list of all classes in package of mainClass
-     */
     public List<Class<?>> getClassListFromTargetPackage(final Class<?> mainClass) {
+        return Collections.unmodifiableList(filter.getFinalClassList());
 
-        final Data data = new StartupData(mainClass.getResource(mainClass.getSimpleName() + ".class").getPath());
-        final ClassInstanceCollection clsCollector = new ClassInstanceCollection(data, mainClass);
-
-        return clsCollector.collect();
     }
 
-    /**
-     *
-     * @return new Request
-     */
     public Request askForRequest() {
-        return new Request(this.instanceService);
+        return new Request(founder);
     }
 
-    /**
-     *
-     * @param injectedList
-     */
     public void inject(final List<Object> injectedList) {
         this.container.inject(injectedList);
     }
 
-    /**
-     *
-     * @param map
-     */
     public void inject(final Map<String, Class<?>> map) {
         this.container.inject(map);
     }
 
-    /**
-     *
-     * @param classes
-     */
-    public void inject(final Class<?> ...classes) {
+    public void inject(final Class<?>... classes) {
         final Map<String, Class<?>> map = new HashMap<>();
         for (Class<?> cl : classes) {
             map.put(cl.getSimpleName(), cl);
