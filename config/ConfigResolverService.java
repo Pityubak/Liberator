@@ -1,7 +1,8 @@
 package com.pityubak.liberator.config;
 
 import com.pityubak.founder.Founder;
-import java.lang.annotation.Target;
+import com.pityubak.liberator.builder.ConfigDependencyService;
+import com.pityubak.liberator.builder.ConfigDetails;
 import com.pityubak.liberator.layer.CollectionConfiguration;
 import com.pityubak.liberator.service.AbstractMethodHandling;
 
@@ -11,12 +12,12 @@ import com.pityubak.liberator.service.AbstractMethodHandling;
  */
 public class ConfigResolverService implements Resolver {
 
-    private final Dependency config;
+    private final ConfigDependencyService config;
     private final CollectionConfiguration collection;
     private final Founder founder;
     private final AbstractMethodHandling methodHandling;
 
-    public ConfigResolverService(Dependency config, CollectionConfiguration collection,
+    public ConfigResolverService(ConfigDependencyService config, CollectionConfiguration collection,
             Founder founder, AbstractMethodHandling methodHandling) {
         this.config = config;
         this.collection = collection;

@@ -1,24 +1,25 @@
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.config;
 
 import com.pityubak.liberator.annotations.MethodBox;
 import com.pityubak.liberator.annotations.MethodElement;
-import com.pityubak.liberator.config.MethodDependency;
-import com.pityubak.liberator.config.MethodDetails;
+import com.pityubak.liberator.builder.Mapper;
+import com.pityubak.liberator.builder.MethodDetails;
 import java.lang.reflect.Method;
 
 /**
  *
  * @author Pityubak
  */
-public class MethodProcessor {
+public class MethodProcessor implements Processor {
 
-    private final MethodDependency methodConfig;
+    private final Mapper methodConfig;
 
-    public MethodProcessor(MethodDependency methodConfig) {
+    public MethodProcessor(Mapper methodConfig) {
         this.methodConfig = methodConfig;
     }
 
-    public void registerMethodObject(final Class<?> loadedClass) {
+    @Override
+    public void registerObject(final Class<?> loadedClass) {
 
         if (loadedClass.isAnnotationPresent(MethodBox.class)) {
             for (Method method : loadedClass.getDeclaredMethods()) {
@@ -42,7 +43,6 @@ public class MethodProcessor {
                     + " Injected method always need  target annotation on first place.");
         } else {
 
-            
             MethodDetails details = new MethodDetails.Builder()
                     .addMethodName(method.getName())
                     .addClassName(loadedClass)
@@ -51,7 +51,7 @@ public class MethodProcessor {
                     .withModificationFlag(element.value())
                     .withSimpleName(loadedClass.getSimpleName())
                     .build();
-            methodConfig.createMethodMapping(details);
+            methodConfig.createMapping(details);
 
         }
     }

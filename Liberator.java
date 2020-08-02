@@ -4,16 +4,16 @@ import com.pityubak.collier.Collier;
 import com.pityubak.collier.misc.ParsingTarget;
 import com.pityubak.founder.Founder;
 import com.pityubak.founder.data.Parameter;
-import com.pityubak.liberator.builder.ConfigProcessor;
-import com.pityubak.liberator.builder.MethodProcessor;
+import com.pityubak.liberator.config.ConfigProcessor;
+import com.pityubak.liberator.config.MethodProcessor;
 import com.pityubak.liberator.config.ClassFilter;
 
-import com.pityubak.liberator.config.MethodDependencyService;
+import com.pityubak.liberator.builder.MethodDependencyService;
 
 import java.util.List;
 import com.pityubak.liberator.config.ConfigResolverService;
-import com.pityubak.liberator.config.Dependency;
-import com.pityubak.liberator.config.ConfigDependencyService;
+import com.pityubak.liberator.builder.ConfigDependencyService;
+import com.pityubak.liberator.builder.ConfigDetails;
 import com.pityubak.liberator.config.Filter;
 import com.pityubak.liberator.config.MainResolverService;
 import com.pityubak.liberator.data.Request;
@@ -23,12 +23,14 @@ import com.pityubak.liberator.service.MethodDetailsService;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.pityubak.liberator.config.MethodDependency;
 import com.pityubak.liberator.config.MethodResolverService;
 import com.pityubak.liberator.config.Resolver;
 import java.util.Collections;
 import com.pityubak.liberator.layer.CollectionConfiguration;
 import com.pityubak.liberator.layer.CollectionConfigurationLayer;
+import com.pityubak.liberator.builder.Mapper;
+import com.pityubak.liberator.builder.MethodDetails;
+import com.pityubak.liberator.builder.ObjectMapper;
 
 /**
  *
@@ -37,41 +39,33 @@ import com.pityubak.liberator.layer.CollectionConfigurationLayer;
 public final class Liberator {
 
     private final Founder founder;
-    private final Collier collier;
     private final Container container;
-    private final MethodDependency methodDependency;
-
-    private final Dependency configDependency;
-    private final Resolver configResolver;
-    private final Resolver methodResolver;
     private final Resolver mainResolver;
-    private final DetailsService detailsService;
-    private final AbstractMethodHandling methodHandler;
-    private final ConfigProcessor configProcessor;
     private final MethodProcessor methodProcessor;
-
-    private final CollectionConfiguration colleectionConfiguration;
     private final Filter filter;
 
     public Liberator(final Class<?> cl) {
-        this.founder = new Founder();
-        this.collier = new Collier(cl, ParsingTarget.CLASS_FILE);
-        this.filter = new ClassFilter(collier);
-        this.colleectionConfiguration = new CollectionConfigurationLayer(filter);
-        this.configDependency = new ConfigDependencyService();
+        Collier collier = new Collier(cl, ParsingTarget.CLASS_FILE);
+        Mapper<ConfigDetails> configMapper = new ObjectMapper<>();
+        Mapper<MethodDetails> methodMapper = new ObjectMapper<>();
+        ConfigDependencyService configDependency = new ConfigDependencyService(configMapper);
+        ConfigProcessor configProcessor = new ConfigProcessor(configMapper);
+        MethodDependencyService methodDependency = new MethodDependencyService(methodMapper);
+        Resolver methodResolver = new MethodResolverService(methodMapper);
 
-        this.configProcessor = new ConfigProcessor(this.configDependency);
-        this.methodDependency = new MethodDependencyService();
-        this.methodProcessor = new MethodProcessor(methodDependency);
-        this.methodHandler = new AbstractMethodHandling(founder);
-        this.configResolver = new ConfigResolverService(this.configDependency,
-                this.colleectionConfiguration, founder, this.methodHandler);
-        this.methodResolver = new MethodResolverService(this.methodDependency);
-        this.mainResolver = new MainResolverService(this.configResolver, this.methodResolver);
-        this.detailsService = new MethodDetailsService(this.methodDependency, founder);
-        this.container = new Container(founder, this.methodDependency, this.detailsService, this.methodHandler);
+        this.founder = new Founder();
+        this.filter = new ClassFilter(collier);
+        CollectionConfiguration collectionConfiguration = new CollectionConfigurationLayer(filter);
+        this.methodProcessor = new MethodProcessor(methodMapper);
+        AbstractMethodHandling methodHandler = new AbstractMethodHandling(founder);
+        Resolver configResolver = new ConfigResolverService(configDependency,
+                collectionConfiguration, founder, methodHandler);
+
+        this.mainResolver = new MainResolverService(configResolver, methodResolver);
+        DetailsService detailsService = new MethodDetailsService(methodDependency, founder);
+        this.container = new Container(founder, methodDependency, detailsService, methodHandler);
         this.filter.getFinalClassList().forEach(t -> {
-            configProcessor.registerConfigObject((Class<?>) t);
+            configProcessor.registerObject((Class<?>) t);
         });
 
     }
@@ -79,7 +73,7 @@ public final class Liberator {
     public void init(final Class<?> cl) {
         this.mainResolver.resolve(cl);
         filter.getFinalClassList().forEach(t -> {
-            methodProcessor.registerMethodObject((Class<?>) t);
+            methodProcessor.registerObject((Class<?>) t);
         });
 
     }

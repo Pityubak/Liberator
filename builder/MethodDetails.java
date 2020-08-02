@@ -1,4 +1,4 @@
-package com.pityubak.liberator.config;
+package com.pityubak.liberator.builder;
 
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.util.List;

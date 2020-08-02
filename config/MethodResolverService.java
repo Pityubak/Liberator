@@ -1,5 +1,7 @@
 package com.pityubak.liberator.config;
 
+import com.pityubak.liberator.builder.Mapper;
+
 /**
  *
  * @author Pityubak
@@ -7,16 +9,15 @@ package com.pityubak.liberator.config;
  */
 public class MethodResolverService implements Resolver {
 
-    private final MethodDependency deps;
+    private final Mapper mapper;
 
-    public MethodResolverService(MethodDependency deps) {
-        this.deps = deps;
+    public MethodResolverService(Mapper mapper) {
+        this.mapper = mapper;
     }
-    
-    
+
     @Override
     public void resolve(Class<?> cl) {
-       this.deps.removeMapping();
+        mapper.removeMapping();
     }
-    
+
 }

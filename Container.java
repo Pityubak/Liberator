@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import com.pityubak.liberator.config.MethodDependency;
+import com.pityubak.liberator.builder.MethodDependencyService;
 
 /**
  * @author Pityubak
@@ -19,12 +19,12 @@ import com.pityubak.liberator.config.MethodDependency;
 public class Container {
 
     private final Founder founder;
-    private final MethodDependency methodDependency;
+    private final MethodDependencyService methodDependency;
     private final InjectionService injectionService;
     private final AbstractMethodHandling methodHandler;
     private final DetailsService detailsService;
 
-    public Container(Founder founder, MethodDependency methodDependency,
+    public Container(Founder founder, MethodDependencyService methodDependency,
             DetailsService detailsService, AbstractMethodHandling methodHandling) {
         this.founder = founder;
         this.methodDependency = methodDependency;

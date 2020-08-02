@@ -1,25 +1,25 @@
-package com.pityubak.liberator.builder;
+package com.pityubak.liberator.config;
 
 import com.pityubak.liberator.annotations.Config;
-import com.pityubak.liberator.config.ConfigDetails;
-import com.pityubak.liberator.config.ConfigurationService;
-import com.pityubak.liberator.config.Dependency;
+import com.pityubak.liberator.builder.ConfigDetails;
+import com.pityubak.liberator.builder.Mapper;
 
 /**
  *
  * @author Pityubak
  *
  */
-public class ConfigProcessor  {
+public class ConfigProcessor implements Processor  {
 
-    private final Dependency dependency;
+    private final Mapper dependency;
 
-    public ConfigProcessor(Dependency configDependency) {
+    public ConfigProcessor(Mapper configDependency) {
         this.dependency = configDependency;
   
     }
 
-    public void registerConfigObject(final Class<?> loadedClass) {
+    @Override
+    public void registerObject(final Class<?> loadedClass) {
         if (loadedClass.isAnnotationPresent(Config.class)) {
             this.createConfigDetails(loadedClass);
         } 

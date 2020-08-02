@@ -1,4 +1,4 @@
-package com.pityubak.liberator.config;
+package com.pityubak.liberator.builder;
 
 /**
  *

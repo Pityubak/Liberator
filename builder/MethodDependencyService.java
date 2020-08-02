@@ -1,4 +1,4 @@
-package com.pityubak.liberator.config;
+package com.pityubak.liberator.builder;
 
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.util.ArrayList;
@@ -10,18 +10,16 @@ import java.util.stream.Collectors;
  *
  * @author Pityubak
  */
-public final class MethodDependencyService implements MethodDependency {
+public final class MethodDependencyService {
 
-    private final List<MethodDetails> methodDetailsList = new ArrayList<>();
+    private final Mapper<MethodDetails> mappedObjects;
 
-    @Override
-    public void createMethodMapping(final MethodDetails details) {
-        methodDetailsList.add(details);
+    public MethodDependencyService(Mapper<MethodDetails> mappedObjects) {
+        this.mappedObjects = mappedObjects;
     }
 
-    @Override
     public MethodDetails methodMapping(final Class<?> cl, final ModificationFlag flag) {
-       
+
         final MethodDetails base = this.get(flag).stream()
                 .filter(x -> x.getAnnotation().equals(cl))
                 .findFirst()
@@ -37,7 +35,7 @@ public final class MethodDependencyService implements MethodDependency {
     private List<MethodDetails> get(final ModificationFlag flag) {
 
         final List<MethodDetails> list = new ArrayList<>();
-        this.methodDetailsList.forEach(el -> {
+        this.mappedObjects.mapping().forEach(el -> {
             if (el.getModFlag().equals(flag)) {
                 list.add(el);
 
@@ -46,15 +44,9 @@ public final class MethodDependencyService implements MethodDependency {
         return list;
     }
 
-    @Override
     public List<Class<?>> getAnnotationList(final ModificationFlag flag) {
-
         return get(flag).stream().map(MethodDetails::getAnnotation).collect(Collectors.toList());
     }
 
-    @Override
-    public void removeMapping() {
-        this.methodDetailsList.clear();
-    }
 
 }

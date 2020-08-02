@@ -16,11 +16,6 @@
             <artifactId>Founder</artifactId>
             <version>1.0-Initial</version>
         </dependency>
-        <!--        <dependency>
-            <groupId>com.pityubak</groupId>
-            <artifactId>AnnotationCollector</artifactId>
-            <version>1.0-SubEarth</version>
-        </dependency>-->
         <dependency>
             <groupId>com.pityubak</groupId>
             <artifactId>Collier</artifactId>

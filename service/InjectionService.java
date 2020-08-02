@@ -8,7 +8,7 @@ import com.pityubak.liberator.misc.Insertion;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
-import com.pityubak.liberator.config.MethodDependency;
+import com.pityubak.liberator.builder.MethodDependencyService;
 
 /**
  *
@@ -19,17 +19,17 @@ public class InjectionService implements Injection {
     private final ClassInjectionService inspector;
     private final FieldInjectService fieldService;
     private final Founder founder;
-    private final MethodDependency config;
+    private final MethodDependencyService methodDependencyService;
     private final AbstractMethodHandling methodHandling;
     private final DetailsService service;
     private final MethodInjectService methodService;
 
     public InjectionService(Founder founder,
-            MethodDependency config, DetailsService service,
+            MethodDependencyService config, DetailsService service,
             AbstractMethodHandling methodHandling) {
         this.founder = founder;
         this.service = service;
-        this.config = config;
+        this.methodDependencyService = config;
         this.methodHandling = methodHandling;
         this.methodService = new MethodInjectService(this.service);
         this.inspector = new ClassInjectionService(founder, this.service);
@@ -40,7 +40,7 @@ public class InjectionService implements Injection {
     @Override
     public void inject(final Object target, final ModificationFlag flag) {
 
-        final List<Class<?>> annotationList = this.config.getAnnotationList(flag);
+        final List<Class<?>> annotationList = this.methodDependencyService.getAnnotationList(flag);
         final Class<?> injectedClass = target.getClass();
         try {
 

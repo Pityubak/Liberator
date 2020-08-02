@@ -1,10 +1,10 @@
 package com.pityubak.liberator.service;
 
 import com.pityubak.founder.Founder;
-import com.pityubak.liberator.config.MethodDetails;
+import com.pityubak.liberator.builder.MethodDetails;
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.lang.reflect.Method;
-import com.pityubak.liberator.config.MethodDependency;
+import com.pityubak.liberator.builder.MethodDependencyService;
 
 /**
  *
@@ -12,14 +12,14 @@ import com.pityubak.liberator.config.MethodDependency;
  */
 public final class MethodDetailsService implements DetailsService {
 
-    private final MethodDependency config;
+    private final MethodDependencyService methodService;
 
     private final Founder founder;
 
     private MethodDetails detail;
 
-    public MethodDetailsService(MethodDependency config, Founder founder) {
-        this.config = config;
+    public MethodDetailsService(MethodDependencyService methodService, Founder founder) {
+        this.methodService = methodService;
         this.founder = founder;
     }
 
@@ -43,7 +43,7 @@ public final class MethodDetailsService implements DetailsService {
 
     @Override
     public void processDetails(final Class<?> cl, final ModificationFlag flag) {
-        this.detail = this.config.methodMapping(cl, flag);
+        this.detail = this.methodService.methodMapping(cl, flag);
     }
 
 }
