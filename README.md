@@ -3,6 +3,7 @@ Java injection tool that helps create custom annotation library.
 
 ### History
 
+- 0.3.1 submoduls-Founder, Collier  
 - 0.3 adding basic configuration support
 - 0.2 same logic, but Liberator became more robust and flexible
 - 0.1 initial version
@@ -118,7 +119,7 @@ public class Context {
 ### Fourth(optional) step:
 Create config class, and set filter and registrate abstraction. This is one of the XMlGrinder's Config files.
 
-~~~
+~~~java
 @Config(XmlWrite.class)
 public class XmlWriteConfig implements ConfigurationService {
 
@@ -147,6 +148,10 @@ public class XmlWriteConfig implements ConfigurationService {
 
 ## Limitations
 For now Liberator support only field, class  and limited method injection with static/early initialization. 
+
+## Submoduls
+1. [Collier](https://github.com/Pityubak/Collier)
+2. [Founder](https://github.com/Pityubak//Founder)
 
 ## Example
 1. [GameAnnotationLibrary-this made by old Liberator version, not updated](https://github.com/Pityubak/GameAnnotationLibrary)
