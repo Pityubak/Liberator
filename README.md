@@ -3,7 +3,7 @@ Java injection tool that helps create custom annotation library.
 
 ### History
 
-- 0.3.1 submodels-Founder, Collier  
+- 0.3.1 submoduls-Founder, Collier  
 - 0.3 adding basic configuration support
 - 0.2 same logic, but Liberator became more robust and flexible
 - 0.1 initial version
