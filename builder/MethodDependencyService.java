@@ -19,7 +19,7 @@ public final class MethodDependencyService {
     }
 
     public MethodDetails methodMapping(final Class<?> cl, final ModificationFlag flag) {
-
+    
         final MethodDetails base = this.get(flag).stream()
                 .filter(x -> x.getAnnotation().equals(cl))
                 .findFirst()
@@ -33,7 +33,6 @@ public final class MethodDependencyService {
     }
 
     private List<MethodDetails> get(final ModificationFlag flag) {
-
         final List<MethodDetails> list = new ArrayList<>();
         this.mappedObjects.mapping().forEach(el -> {
             if (el.getModFlag().equals(flag)) {

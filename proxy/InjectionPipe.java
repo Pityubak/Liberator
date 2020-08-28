@@ -30,6 +30,7 @@ public final class InjectionPipe<R> implements Pipe<R> {
 
     @Override
     public void execute(final R target, final ModificationFlag flag) {
+         
         this.list.forEach(anno -> {
             Class<? extends Annotation> type = anno.asSubclass(Annotation.class);
             if (this.predicate != null) {

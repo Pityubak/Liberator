@@ -1,7 +1,6 @@
 package com.pityubak.liberator.data;
 
 import com.pityubak.founder.Founder;
-import com.pityubak.liberator.exceptions.RequestInitializationException;
 
 /**
  *

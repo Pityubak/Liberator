@@ -41,7 +41,6 @@ public final class FieldInjectFinalizerService implements InjectFinalizerService
             final Response args = this.respService.create();
 
             if (method.getReturnType().equals(Void.TYPE)) {
-
                 method.invoke(instance, f.getAnnotation(type), args);
 
             } else {

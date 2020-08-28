@@ -1,4 +1,4 @@
-package com.pityubak.liberator.exceptions;
+package com.pityubak.liberator.service;
 
 /**
  * @author Pityubak

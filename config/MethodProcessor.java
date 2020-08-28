@@ -20,7 +20,6 @@ public class MethodProcessor implements Processor {
 
     @Override
     public void registerObject(final Class<?> loadedClass) {
-
         if (loadedClass.isAnnotationPresent(MethodBox.class)) {
             for (Method method : loadedClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(MethodElement.class)) {

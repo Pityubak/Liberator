@@ -25,7 +25,6 @@ public final class FieldInjectService implements ExecutorService<Field> {
 
     @Override
     public void inject(final Field f, final Object obj, final List<Class<?>> list, final ModificationFlag flag) {
-
         final ResponseProxy responseService = new FieldResponseService(founder, obj, f);
         final FieldInjectFinalizerService injService = new FieldInjectFinalizerService(service, responseService, obj);
         final Pipe<Field> pipe = new InjectionPipe<Field>(list, this.service, injService)

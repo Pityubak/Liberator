@@ -34,7 +34,6 @@ public class Container {
     }
 
     public void inject(final Map<String, Class<?>> injectedClasses) {
-
         final List<Object> namedObjectList = new ArrayList<>();
         injectedClasses.keySet().forEach(name -> {
             Class<?> cls = injectedClasses.get(name);

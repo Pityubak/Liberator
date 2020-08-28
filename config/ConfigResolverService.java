@@ -30,6 +30,7 @@ public class ConfigResolverService implements Resolver {
         collection.removeAllClasses();
         this.methodHandling.removeAll();
         final ConfigDetails details = (ConfigDetails) this.config.mapping(cl);
+
         final Class<?> service = details.getService();
         final String serviceName = service.getSimpleName();
         final ConfigurationService configService
@@ -37,6 +38,7 @@ public class ConfigResolverService implements Resolver {
 
         configService.filter(collection);
         configService.registerAbstractMethod(methodHandling);
+
     }
 
 }

@@ -31,6 +31,8 @@ import com.pityubak.liberator.layer.CollectionConfigurationLayer;
 import com.pityubak.liberator.builder.Mapper;
 import com.pityubak.liberator.builder.MethodDetails;
 import com.pityubak.liberator.builder.ObjectMapper;
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  *
@@ -45,6 +47,7 @@ public final class Liberator {
     private final Filter filter;
 
     public Liberator(final Class<?> cl) {
+
         Collier collier = new Collier(cl, ParsingTarget.CLASS_FILE);
         Mapper<ConfigDetails> configMapper = new ObjectMapper<>();
         Mapper<MethodDetails> methodMapper = new ObjectMapper<>();
@@ -70,8 +73,15 @@ public final class Liberator {
 
     }
 
-    public void init(final Class<?> cl) {
+    public void initWithConfig(final Class<?> cl) {
         this.mainResolver.resolve(cl);
+        filter.getFinalClassList().forEach(t -> {
+            methodProcessor.registerObject((Class<?>) t);
+        });
+
+    }
+
+    public void initWithoutConfig() {
         filter.getFinalClassList().forEach(t -> {
             methodProcessor.registerObject((Class<?>) t);
         });
@@ -80,11 +90,14 @@ public final class Liberator {
 
     public void registerParameterForInit(final Class<?> cls, final Parameter prm) {
         founder.registerParameter(cls, prm);
-
     }
 
     public List<Class<?>> getClassListFromTargetPackage(final Class<?> mainClass) {
-        return Collections.unmodifiableList(filter.getFinalClassList());
+        Collier coll = new Collier(mainClass, ParsingTarget.CLASS_FILE);
+        List<Class<?>> pkgClasses = new ArrayList<>();
+        Consumer<Class<?>> cons = pkgClasses::add;
+        coll.linkToCollector(cons);
+        return Collections.unmodifiableList(pkgClasses);
 
     }
 

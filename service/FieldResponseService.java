@@ -57,7 +57,7 @@ public final class FieldResponseService implements ResponseProxy {
             this.targetField.setAccessible(true);
             return null;
         });
-
+   
         return BuilderProxy.of(VirtualResponse::new)
                 .with(VirtualResponse::setTargetName, this.targetField.getName())
                 .with(VirtualResponse::setValue, this.targetField.get(caller))

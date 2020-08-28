@@ -1,7 +1,6 @@
 package com.pityubak.liberator.service;
 
 import com.pityubak.founder.Founder;
-import com.pityubak.liberator.exceptions.InjectionException;
 import com.pityubak.liberator.misc.ModificationFlag;
 import java.lang.reflect.Field;
 import com.pityubak.liberator.misc.Insertion;
