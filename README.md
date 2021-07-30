@@ -12,8 +12,7 @@ Next version: error handling and logging
 
 ## Overview
 
-Liberator use "method-first" approach, the method determines which annotation belongs to.
-So let see, how Liberator works in working example (AutoInjector) :
+Liberator uses a "method-first" approach, the method determines which annotation it belongs to. So let's see how Liberator works in a working example (AutoInjector) :
 
 
 
@@ -37,13 +36,14 @@ public @interface AutoInject {
 
 
 ### Second step:
-Liberator has two annotation, @MethodBox marks the class, in which method is located and @MethodElement, that marks the method.\
-@MethodElement annotation has an enum value(ModificationFlag).\
-This enum tells to Liberator, when injection should happen.\
-Liberator has four injection phase:Creation, High, Normal and Low.\
-Parameter of method always must to be in first place custom annotation \
-and in second place Liberator's special class: Response. Response contains some information \
-from target of injection(for example:type, value).
+The Liberator has two annotations, @MethodBox denotes the class in which the method is located, and @MethodElement denotes the method.
+The @MethodElement annotation has an enum value (ModificationFlag).\
+This enum tells Liberator when the injection should take place.\
+Liberator has four injection phases: creation, high, normal and low.\
+The method parameter should always be the first in the custom annotations
+and in the second place the special class of Liberator: Response. The response contains some information \
+about the target of the injection (e.g. type, value).
+
 
 ~~~java
 
@@ -85,8 +85,8 @@ public class AutoInjectorService {
 ~~~
 
 ### Third step:
-Main class always must to contain init and inject methods. \
-And here's the main class of custom annotation library:
+The main class should always contain init and inject methods. \
+And here is the main class of the custom annotation library:
 
 ~~~java
 public class Context {
@@ -117,7 +117,7 @@ public class Context {
 ~~~
 
 ### Fourth(optional) step:
-Create config class, and set filter and registrate abstraction. This is one of the XMlGrinder's Config files.
+Create a config class and set the filter and registration abstraction. This is one of the config files in XMlGrinder.
 
 ~~~java
 @Config(XmlWrite.class)
