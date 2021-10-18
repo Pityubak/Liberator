@@ -146,8 +146,6 @@ public class XmlWriteConfig implements ConfigurationService {
 ~~~
 
 
-## Limitations
-For now Liberator support only field, class  and limited method injection with static/early initialization. 
 
 ## Submodules
 1. [Collier](https://github.com/Pityubak/Collier)
